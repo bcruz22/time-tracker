@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#1e2327">
-<meta name="description" content="Track billable time. Own your data.">
+<meta name="theme-color" content="#00274C">
+<meta name="description" content="Track local. Save local.">
 <title>Time /T</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -13,57 +13,94 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Time /T">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #f7f8fa;
-    --surface: #ffffff;
-    --surface-2: #f0f2f5;
-    --border: #e2e5eb;
-    --border-strong: #cdd2db;
-    --text: #1a1d23;
-    --text-muted: #6b7280;
-    --text-subtle: #9ba1ac;
-    --accent: #00274C;        /* U-M Blue */
-    --accent-hover: #1B3F6B;
-    --accent-soft: rgba(0,39,76,0.10);
-    --accent-contrast: #ffffff;
-    --accent-strong: #00274C; /* always U-M Blue regardless of theme, for one-off cases needing a fixed brand color */
-    --danger: #9A3324;        /* Tappan Red */
-    --danger-soft: rgba(154,51,36,0.12);
-    --warning: #D86018;       /* Ross Orange */
-    --warning-soft: rgba(216,96,24,0.12);
-    --success: #75988D;       /* Rackham Green */
-    --success-soft: rgba(117,152,141,0.16);
-    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 1px 3px rgba(0,0,0,.06);
-    --shadow-lg: 0 10px 25px rgba(0,0,0,.08), 0 4px 10px rgba(0,0,0,.06);
-    --radius: 8px;
+  /* Dark theme (default, on-brand U-M Blue) — applied when the user's system
+     is dark, or when [data-theme="dark"] is set explicitly. Mirrors the
+     configuration of bcruz22/expenses-tracker for a consistent product family. */
+  :root, :root[data-theme="dark"] {
+    --bg: #00274C;
+    --surface: #0A3155;
+    --surface-2: #123C63;
+    --border: #1F4C74;
+    --border-strong: #2A5A85;
+    --text: #FFFFFF;
+    --text-muted: #A9BFD4;
+    --text-faint: #6E8AA8;
+    --text-subtle: #6E8AA8;
+    --accent: #FFCB05;
+    --accent-text: #00274C;
+    --accent-contrast: #00274C;
+    --accent-strong: #00274C;
+    --accent-soft: rgba(255, 203, 5, 0.18);
+    --danger: #9A3324;
+    --danger-soft: rgba(154, 51, 36, 0.22);
+    --warning: #D86018;
+    --warning-soft: rgba(216, 96, 24, 0.22);
+    --success: #A5A508;
+    --success-soft: rgba(165, 165, 8, 0.22);
+    --toast-bg: #123C63;
+    --scheme: dark;
+    --cat-streaming: #00B2A9;
+    --cat-software: #702082;
+    --cat-utilities: #D86018;
+    --cat-insurance: #2F65A7;
+    --cat-fitness: #E01F7C;
+    --cat-subscriptions: #A5A508;
+    --cat-other: #989C97;
+    --shadow: 0 1px 2px rgba(0,0,0,.20), 0 1px 3px rgba(0,0,0,.35);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,.35), 0 4px 10px rgba(0,0,0,.25);
+    --radius: 10px;
     --radius-sm: 6px;
     --radius-lg: 12px;
-    --mono: "IBM Plex Mono", "SF Mono", "Monaco", "Cascadia Code", "Roboto Mono", "Consolas", monospace;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", "Monaco", "Cascadia Code", "Roboto Mono", "Consolas", monospace;
     --sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
-  html[data-theme="dark"] {
-    --bg: #0f1114;
-    --surface: #1a1d22;
-    --surface-2: #22262c;
-    --border: #2d3138;
-    --border-strong: #3a3f47;
-    --text: #e8eaed;
-    --text-muted: #9aa0a6;
-    --text-subtle: #6b7280;
-    --accent: #FFCB05;        /* U-M Maize, used as the dark-mode accent for contrast */
-    --accent-hover: #FFD633;
-    --accent-soft: rgba(255,203,5,0.16);
-    --accent-contrast: #00274C;
-    --danger: #E2694B;
-    --danger-soft: rgba(226,105,75,0.18);
-    --warning: #F08A3C;
-    --warning-soft: rgba(240,138,60,0.18);
-    --success: #8FB6AA;
-    --success-soft: rgba(143,182,170,0.18);
-    --shadow: 0 1px 2px rgba(0,0,0,.2), 0 1px 3px rgba(0,0,0,.25);
-    --shadow-lg: 0 10px 25px rgba(0,0,0,.3), 0 4px 10px rgba(0,0,0,.2);
+  /* Light theme — applied when the user's system is light AND they haven't
+     manually forced dark, or when [data-theme="light"] is set. */
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #FFFFFF;
+      --surface: #F5F7FA;
+      --surface-2: #EBEFF5;
+      --border: #D3DCE8;
+      --border-strong: #BFC9D9;
+      --text: #00274C;
+      --text-muted: #5A6B85;
+      --text-faint: #667289;
+      --text-subtle: #667289;
+      --accent-soft: rgba(255, 203, 5, 0.24);
+      --danger-soft: rgba(154, 51, 36, 0.14);
+      --warning-soft: rgba(216, 96, 24, 0.16);
+      --success-soft: rgba(165, 165, 8, 0.20);
+      --toast-bg: #00274C;
+      --scheme: light;
+      --shadow: 0 1px 2px rgba(0,39,76,.06), 0 1px 3px rgba(0,39,76,.08);
+      --shadow-lg: 0 10px 25px rgba(0,39,76,.10), 0 4px 10px rgba(0,39,76,.08);
+    }
   }
+  :root[data-theme="light"] {
+    --bg: #FFFFFF;
+    --surface: #F5F7FA;
+    --surface-2: #EBEFF5;
+    --border: #D3DCE8;
+    --border-strong: #BFC9D9;
+    --text: #00274C;
+    --text-muted: #5A6B85;
+    --text-faint: #667289;
+    --text-subtle: #667289;
+    --accent-soft: rgba(255, 203, 5, 0.24);
+    --danger-soft: rgba(154, 51, 36, 0.14);
+    --warning-soft: rgba(216, 96, 24, 0.16);
+    --success-soft: rgba(165, 165, 8, 0.20);
+    --toast-bg: #00274C;
+    --scheme: light;
+    --shadow: 0 1px 2px rgba(0,39,76,.06), 0 1px 3px rgba(0,39,76,.08);
+    --shadow-lg: 0 10px 25px rgba(0,39,76,.10), 0 4px 10px rgba(0,39,76,.08);
+  }
+  html { color-scheme: var(--scheme); }
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
   body { min-height: 100vh; padding-bottom: env(safe-area-inset-bottom); }
@@ -82,14 +119,20 @@
   .brand { font-family: var(--mono); font-size: 22px; font-weight: 600; letter-spacing: -0.02em; display: flex; align-items: baseline; gap: 2px; }
   .brand-slash { color: var(--accent); }
   .brand-t { color: var(--accent); }
+  .brand-tagline { font-size: 11px; font-family: var(--sans); font-weight: 400; color: var(--text-muted); letter-spacing: 0.02em; margin-left: 10px; white-space: nowrap; }
   .totals { display: flex; gap: 16px; flex: 1; flex-wrap: wrap; }
   .total-pill { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px; display: flex; flex-direction: column; gap: 2px; box-shadow: var(--shadow); }
   .total-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
   .total-value { font-family: var(--mono); font-size: 16px; font-weight: 600; color: var(--text); }
-  .header-controls { display: flex; gap: 6px; }
+  .header-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .icon-btn { width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); color: var(--text-muted); transition: background .12s, color .12s; }
   .icon-btn:hover { background: var(--surface-2); color: var(--text); }
   .icon-btn svg { width: 18px; height: 18px; }
+  .seg-toggle { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 3px; flex-shrink: 0; }
+  .seg-toggle button { background: none; border: none; color: var(--text-faint); font-size: 11px; font-weight: 600; font-family: inherit; padding: 5px 10px; border-radius: 999px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.06em; transition: background .12s, color .12s; }
+  .seg-toggle button:hover { color: var(--text); }
+  .seg-toggle button.active { background: var(--accent); color: var(--accent-text); }
+  .seg-toggle button.active:hover { color: var(--accent-text); }
 
   /* Sections */
   section { margin-bottom: 24px; }
@@ -99,8 +142,8 @@
 
   /* Buttons */
   .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 12px; border-radius: var(--radius-sm); font-weight: 500; font-size: 13px; transition: background .12s, border-color .12s, color .12s; border: 1px solid transparent; }
-  .btn-primary { background: var(--accent); color: white; }
-  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-primary { background: var(--accent); color: var(--accent-contrast); }
+  .btn-primary:hover { filter: brightness(1.08); }
   .btn-secondary { background: var(--surface); border-color: var(--border); color: var(--text); }
   .btn-secondary:hover { background: var(--surface-2); border-color: var(--border-strong); }
   .btn-danger { background: var(--surface); border-color: var(--border); color: var(--danger); }
@@ -152,13 +195,22 @@
   .ticket-header:hover { background: var(--surface-2); }
   .ticket-caret { color: var(--text-muted); transition: transform .15s; flex-shrink: 0; }
   .ticket-group.expanded .ticket-caret { transform: rotate(90deg); }
-  .ticket-number { font-family: var(--mono); font-weight: 600; color: var(--text); }
-  .ticket-client { color: var(--text-muted); font-size: 13px; }
-  .ticket-status { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
-  .ticket-status.open { background: var(--success-soft); color: var(--success); }
-  .ticket-status.waiting-customer, .ticket-status.waiting-internal { background: var(--warning-soft); color: var(--warning); }
-  .ticket-status.closed { background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border); }
-  .ticket-total { font-family: var(--mono); font-weight: 600; color: var(--text); margin-left: auto; font-variant-numeric: tabular-nums; }
+  .ticket-number { font-family: var(--mono); font-weight: 600; color: var(--text); flex-shrink: 0; }
+  .ticket-client { color: var(--text-muted); font-size: 13px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ticket-status-wrap { position: relative; display: inline-flex; align-items: center; flex-shrink: 0; }
+  .ticket-status-select {
+    appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;
+    padding: 3px 22px 3px 10px; border-radius: 10px; border: none; cursor: pointer;
+    font-family: inherit; outline: none;
+  }
+  .ticket-status-select:focus { box-shadow: 0 0 0 2px var(--accent-soft); }
+  .ticket-status-select.open { background: var(--success-soft); color: var(--success); }
+  .ticket-status-select.waiting-customer { background: var(--warning-soft); color: var(--warning); }
+  .ticket-status-select.waiting-internal { background: rgba(0, 178, 169, 0.20); color: var(--cat-streaming); }
+  .ticket-status-select.closed { background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border); padding: 2px 21px 2px 9px; }
+  .select-caret { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); pointer-events: none; opacity: 0.7; }
+  .ticket-total { font-family: var(--mono); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; flex-shrink: 0; }
   .ticket-header-actions { display: flex; gap: 4px; }
   .ticket-body { display: none; padding: 0 14px 12px; border-top: 1px solid var(--border); }
   .ticket-group.expanded .ticket-body { display: block; }
@@ -218,7 +270,7 @@
   @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
   /* Update banner */
-  .update-banner { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--accent); color: white; padding: 10px 16px; border-radius: var(--radius); box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; z-index: 150; font-size: 13px; font-weight: 500; }
+  .update-banner { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--accent); color: var(--accent-contrast); padding: 10px 16px; border-radius: var(--radius); box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; z-index: 150; font-size: 13px; font-weight: 500; }
 
   /* Password strength meter */
   .password-strength { margin-top: 8px; }
@@ -253,6 +305,7 @@
   html[data-compact="on"] .session-notes.expanded { white-space: pre-wrap; overflow: visible; text-overflow: unset; }
   html[data-compact="on"] .session-time { min-width: 100px; font-size: 11px; }
   html[data-compact="on"] .brand { font-size: 18px; }
+  html[data-compact="on"] .brand-tagline { display: none; }
   html[data-compact="on"] .btn { padding: 5px 10px; }
   html[data-compact="on"] .app-header { padding-bottom: 10px; margin-bottom: 10px; }
 
@@ -276,20 +329,24 @@
 <body>
 <div id="update-banner" class="update-banner hidden">
   New version available
-  <button class="btn btn-sm" id="reload-btn" style="background: white; color: var(--accent);">Reload</button>
+  <button class="btn btn-sm" id="reload-btn" style="background: var(--accent-text); color: var(--accent);">Reload</button>
 </div>
 
 <div id="app">
   <header class="app-header">
-    <div class="brand">Time<span class="brand-slash">/</span><span class="brand-t">T</span></div>
+    <div class="brand">Time<span class="brand-slash">/</span><span class="brand-t">T</span><span class="brand-tagline">Track local. Save local.</span></div>
     <div class="totals" id="totals"></div>
     <div class="header-controls">
-      <button class="icon-btn" id="compact-toggle" title="Toggle compact mode" aria-label="Toggle compact mode">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-      <button class="icon-btn" id="theme-toggle" title="Toggle theme" aria-label="Toggle theme">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      </button>
+      <div class="seg-toggle" role="group" aria-label="Theme">
+        <button type="button" data-theme-choice="auto" title="Follow system">Auto</button>
+        <button type="button" data-theme-choice="light" title="Light">Light</button>
+        <button type="button" data-theme-choice="dark" title="Dark">Dark</button>
+      </div>
+      <div class="seg-toggle" role="group" aria-label="Density">
+        <button type="button" data-compact-choice="auto" title="Compact on small screens">Auto</button>
+        <button type="button" data-compact-choice="on" title="Always compact">Compact</button>
+        <button type="button" data-compact-choice="off" title="Always full">Full</button>
+      </div>
       <button class="icon-btn" id="settings-btn" title="Settings" aria-label="Settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
@@ -340,11 +397,12 @@ const K = {
   activeTimers: "timetrack.activeTimers",
   settings: "timetrack.settings",
   autocomplete: "timetrack.autocomplete",
+  ticketStatuses: "timetrack.ticketStatuses",
   lastVersion: "timetrack.lastVersion",
 };
 
 const DEFAULT_SETTINGS = {
-  theme: "system",           // "light" | "dark" | "system"
+  theme: "auto",             // "auto" | "light" | "dark"
   compactMode: "auto",       // "auto" | "on" | "off"
   idleThresholdMinutes: 60,
   weekStartDay: 1,           // 0 = Sunday, 1 = Monday
@@ -360,6 +418,7 @@ let state = {
   activeTimers: [],
   settings: {...DEFAULT_SETTINGS},
   autocompleteClients: [],
+  ticketStatuses: {}, // ticketNumber -> status. Status is a ticket-level property, not per-session.
   expandedTickets: new Set(),
   closedExpanded: false,
   idleAcknowledged: {}, // timerId -> bool
@@ -374,10 +433,12 @@ function loadState() {
     const activeTimers = JSON.parse(localStorage.getItem(K.activeTimers) || "[]");
     const settings = {...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(K.settings) || "{}")};
     const autocomplete = JSON.parse(localStorage.getItem(K.autocomplete) || "{}");
+    const ticketStatuses = JSON.parse(localStorage.getItem(K.ticketStatuses) || "{}");
     state.entries = Array.isArray(entries) ? entries : [];
     state.activeTimers = Array.isArray(activeTimers) ? activeTimers : [];
     state.settings = settings;
     state.autocompleteClients = Array.isArray(autocomplete.clients) ? autocomplete.clients : [];
+    state.ticketStatuses = (ticketStatuses && typeof ticketStatuses === "object") ? ticketStatuses : {};
   } catch (e) {
     console.error("Load failed:", e);
   }
@@ -397,7 +458,24 @@ function saveEntries() { safeSetItem(K.entries, JSON.stringify(state.entries), "
 function saveActiveTimers() { safeSetItem(K.activeTimers, JSON.stringify(state.activeTimers), "timers"); }
 function saveSettings() { safeSetItem(K.settings, JSON.stringify(state.settings), "settings"); }
 function saveAutocomplete() { safeSetItem(K.autocomplete, JSON.stringify({clients: state.autocompleteClients}), "autocomplete history"); }
-function saveAll() { saveEntries(); saveActiveTimers(); saveSettings(); saveAutocomplete(); }
+function saveTicketStatuses() { safeSetItem(K.ticketStatuses, JSON.stringify(state.ticketStatuses), "ticket statuses"); }
+function saveAll() { saveEntries(); saveActiveTimers(); saveSettings(); saveAutocomplete(); saveTicketStatuses(); }
+
+// Status is a ticket-level property (one status per Ticket #), independent of individual sessions.
+function getTicketStatus(ticketNumber) {
+  return state.ticketStatuses[ticketNumber] || "Open";
+}
+function setTicketStatus(ticketNumber, status) {
+  state.ticketStatuses[ticketNumber] = status;
+  saveTicketStatuses();
+  render();
+}
+function ensureTicketStatusExists(ticketNumber) {
+  if (!(ticketNumber in state.ticketStatuses)) {
+    state.ticketStatuses[ticketNumber] = "Open";
+    saveTicketStatuses();
+  }
+}
 
 // =====================================================================
 // Helpers
@@ -488,7 +566,6 @@ function createEmptyTimerObject() {
     id: uuid(),
     clientName: "",
     ticketNumber: "",
-    status: "Open",
     notes: "",
     createdAt: nowISO(),
     state: "empty", // "empty" | "running" | "paused" | "completed"
@@ -577,7 +654,6 @@ function stopTimer(id, options = {}) {
     id: t.savedEntryId || uuid(),
     ticketNumber: t.ticketNumber.trim(),
     clientName: t.clientName.trim(),
-    status: t.status,
     notes: t.notes,
     startTime: t.startedAt,
     endTime: nowISO(),
@@ -589,6 +665,8 @@ function stopTimer(id, options = {}) {
   const existingIdx = state.entries.findIndex(e => e.id === entry.id);
   if (existingIdx >= 0) state.entries[existingIdx] = entry;
   else state.entries.push(entry);
+  // Ensure the ticket has a status record (defaults to Open on first session)
+  ensureTicketStatusExists(entry.ticketNumber);
   // Update autocomplete
   if (entry.clientName && !state.autocompleteClients.includes(entry.clientName)) {
     state.autocompleteClients.push(entry.clientName);
@@ -618,7 +696,7 @@ function stopAllTimers() {
 }
 
 function startAgain(id) {
-  // Turn completed timer into a fresh running one with same Client/Ticket/Status
+  // Turn completed timer into a fresh running one with same Client/Ticket
   const t = state.activeTimers.find(x => x.id === id);
   if (!t) return;
   const now = nowISO();
@@ -639,7 +717,6 @@ function clearTimer(id) {
   if (!t) return;
   t.clientName = "";
   t.ticketNumber = "";
-  t.status = "Open";
   t.notes = "";
   t.state = "empty";
   t.accumulatedSeconds = 0;
@@ -666,7 +743,13 @@ function updateTimerField(id, field, value) {
 // =====================================================================
 function deleteEntry(id) {
   if (!confirm("Delete this entry? This cannot be undone.")) return;
+  const entry = state.entries.find(e => e.id === id);
   state.entries = state.entries.filter(e => e.id !== id);
+  // If that was the last session on this ticket, drop the orphaned ticket status
+  if (entry && entry.ticketNumber && !state.entries.some(e => e.ticketNumber === entry.ticketNumber)) {
+    delete state.ticketStatuses[entry.ticketNumber];
+    saveTicketStatuses();
+  }
   saveEntries();
   render();
 }
@@ -690,6 +773,8 @@ function updateEntry(id, updates) {
     }
   }
   entry.updatedAt = nowISO();
+  // If reassigned to a ticket # that's never been seen, give it a default status
+  if (updates.ticketNumber) ensureTicketStatusExists(entry.ticketNumber);
   // Update autocomplete
   if (entry.clientName && !state.autocompleteClients.includes(entry.clientName)) {
     state.autocompleteClients.push(entry.clientName);
@@ -706,16 +791,18 @@ function groupEntries() {
   const groups = {};
   for (const e of state.entries) {
     const key = e.ticketNumber || "(no ticket)";
-    if (!groups[key]) groups[key] = {ticketNumber: key, sessions: [], totalSeconds: 0, latestStatus: e.status, latestUpdatedAt: e.updatedAt, clientName: e.clientName};
+    if (!groups[key]) groups[key] = {ticketNumber: key, sessions: [], totalSeconds: 0, latestUpdatedAt: e.updatedAt, clientName: e.clientName};
     groups[key].sessions.push(e);
     groups[key].totalSeconds += (e.durationSeconds || 0);
     if (new Date(e.updatedAt).getTime() > new Date(groups[key].latestUpdatedAt).getTime()) {
-      groups[key].latestStatus = e.status;
       groups[key].latestUpdatedAt = e.updatedAt;
       groups[key].clientName = e.clientName;
     }
   }
-  return Object.values(groups);
+  const list = Object.values(groups);
+  // Status is a ticket-level property, looked up independently of any session
+  for (const g of list) g.status = getTicketStatus(g.ticketNumber);
+  return list;
 }
 
 function groupSessionsByDay(sessions) {
@@ -825,12 +912,6 @@ function timerCardEl(t) {
           <label class="field-label">Ticket #</label>
           <input type="text" data-field="ticketNumber" value="${escapeHTML(t.ticketNumber)}" placeholder="Ticket number" ${t.state === "completed" ? "readonly" : ""}>
         </div>
-        <div class="field-group field-full">
-          <label class="field-label">Status</label>
-          <select data-field="status" ${t.state === "completed" ? "disabled" : ""}>
-            ${STATUS_OPTIONS.map(s => `<option value="${s}" ${t.status === s ? "selected" : ""}>${s}</option>`).join("")}
-          </select>
-        </div>
       </div>
       <div class="timer-card-clock-wrap">
         <div class="timer-clock" data-clock>${formatClock(elapsed)}</div>
@@ -910,8 +991,8 @@ function renderLog() {
   }
   empty.classList.add("hidden");
   // Split active vs closed
-  const active = groups.filter(g => g.latestStatus !== "Closed");
-  const closed = groups.filter(g => g.latestStatus === "Closed");
+  const active = groups.filter(g => g.status !== "Closed");
+  const closed = groups.filter(g => g.status === "Closed");
   // Sort: most recently updated first
   active.sort((a, b) => new Date(b.latestUpdatedAt) - new Date(a.latestUpdatedAt));
   closed.sort((a, b) => new Date(b.latestUpdatedAt) - new Date(a.latestUpdatedAt));
@@ -953,7 +1034,12 @@ function ticketGroupEl(g) {
       <svg class="ticket-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg>
       <span class="ticket-number">${escapeHTML(g.ticketNumber)}</span>
       <span class="ticket-client">${escapeHTML(g.clientName || "")}</span>
-      <span class="ticket-status ${statusClass(g.latestStatus)}">${escapeHTML(g.latestStatus)}</span>
+      <div class="ticket-status-wrap" data-status-wrap>
+        <select class="ticket-status-select ${statusClass(g.status)}" data-status-select title="Ticket status">
+          ${STATUS_OPTIONS.map(s => `<option value="${s}" ${g.status === s ? "selected" : ""}>${s}</option>`).join("")}
+        </select>
+        <svg class="select-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="10" height="10"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
       <span class="ticket-total">${formatDuration(g.totalSeconds)}</span>
       <div class="ticket-header-actions">
         <button class="btn btn-ghost btn-sm btn-icon" title="Copy all notes" data-copy-group>
@@ -972,11 +1058,16 @@ function ticketGroupEl(g) {
     body.appendChild(dayGroup);
   }
   el.querySelector("[data-toggle]").onclick = (e) => {
-    if (e.target.closest("[data-copy-group]")) return;
+    if (e.target.closest("[data-copy-group]") || e.target.closest("[data-status-wrap]")) return;
     if (state.expandedTickets.has(g.ticketNumber)) state.expandedTickets.delete(g.ticketNumber);
     else state.expandedTickets.add(g.ticketNumber);
     el.classList.toggle("expanded");
   };
+  el.querySelector("[data-status-select]").addEventListener("change", (e) => {
+    e.stopPropagation();
+    setTicketStatus(g.ticketNumber, e.target.value);
+  });
+  el.querySelector("[data-status-wrap]").addEventListener("click", (e) => e.stopPropagation());
   el.querySelector("[data-copy-group]").onclick = (e) => {
     e.stopPropagation();
     const combined = g.sessions
@@ -1227,12 +1318,6 @@ function openEditModal(entry) {
         <label>Ticket #</label>
         <input type="text" id="edit-ticket" value="${escapeHTML(entry.ticketNumber)}">
       </div>
-      <div class="form-row">
-        <label>Status</label>
-        <select id="edit-status">
-          ${STATUS_OPTIONS.map(s => `<option value="${s}" ${entry.status === s ? "selected" : ""}>${s}</option>`).join("")}
-        </select>
-      </div>
       <div class="form-grid">
         <div class="form-row">
           <label>Start</label>
@@ -1269,7 +1354,6 @@ function openEditModal(entry) {
         const updates = {
           clientName: root.querySelector("#edit-client").value.trim(),
           ticketNumber: root.querySelector("#edit-ticket").value.trim(),
-          status: root.querySelector("#edit-status").value,
           startTime: startDate.toISOString(),
           endTime: endDate.toISOString(),
           notes: root.querySelector("#edit-notes").value,
@@ -1303,7 +1387,7 @@ function openSettings() {
         <h3>Appearance</h3>
         <div class="settings-row"><label>Theme</label>
           <select class="settings-control" id="set-theme">
-            <option value="system" ${s.theme==="system"?"selected":""}>System</option>
+            <option value="auto" ${(s.theme==="auto"||s.theme==="system")?"selected":""}>Auto</option>
             <option value="light" ${s.theme==="light"?"selected":""}>Light</option>
             <option value="dark" ${s.theme==="dark"?"selected":""}>Dark</option>
           </select>
@@ -1440,9 +1524,11 @@ function confirmClearAllStage2(onDone) {
         localStorage.removeItem(K.entries);
         localStorage.removeItem(K.activeTimers);
         localStorage.removeItem(K.autocomplete);
+        localStorage.removeItem(K.ticketStatuses);
         state.entries = [];
         state.activeTimers = [];
         state.autocompleteClients = [];
+        state.ticketStatuses = {};
         state.expandedTickets.clear();
         state.idleAcknowledged = {};
         render();
@@ -1578,8 +1664,14 @@ function importJSON(data) {
     return;
   }
   let added = 0, updated = 0;
+  const legacyStatusByTicket = {}; // for older backups where status lived on the entry
   for (const e of data.entries) {
     if (!e.id) e.id = uuid();
+    // Legacy backups had a status field on the entry itself. Salvage it into the ticket map, then strip it from the entry.
+    if (e.status && e.ticketNumber) {
+      legacyStatusByTicket[e.ticketNumber] = e.status;
+      delete e.status;
+    }
     const existing = state.entries.find(x => x.id === e.id);
     if (existing) {
       if (new Date(e.updatedAt || 0) > new Date(existing.updatedAt || 0)) {
@@ -1589,6 +1681,19 @@ function importJSON(data) {
     } else {
       state.entries.push(e);
       added++;
+    }
+  }
+  // Ticket-level statuses: explicit map wins, then salvaged legacy per-entry values, then default
+  if (data.ticketStatuses && typeof data.ticketStatuses === "object") {
+    Object.assign(state.ticketStatuses, data.ticketStatuses);
+  }
+  for (const [ticket, status] of Object.entries(legacyStatusByTicket)) {
+    if (!(ticket in state.ticketStatuses)) state.ticketStatuses[ticket] = status;
+  }
+  // Backfill defaults for any imported ticket that still has no status
+  for (const e of state.entries) {
+    if (e.ticketNumber && !(e.ticketNumber in state.ticketStatuses)) {
+      state.ticketStatuses[e.ticketNumber] = "Open";
     }
   }
   if (data.settings) state.settings = {...DEFAULT_SETTINGS, ...data.settings};
@@ -1629,11 +1734,11 @@ function importCSV(text) {
       const endDate = new Date(cols[idx.end]);
       if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) { skipped++; continue; }
       const parsedDuration = idx.duration >= 0 ? parseInt(cols[idx.duration], 10) : NaN;
+      const ticketNumber = (idx.ticket >= 0 ? cols[idx.ticket] : "") || "";
       const entry = {
         id: uuid(),
-        ticketNumber: (idx.ticket >= 0 ? cols[idx.ticket] : "") || "",
+        ticketNumber,
         clientName: (idx.client >= 0 ? cols[idx.client] : "") || "",
-        status: (idx.status >= 0 ? cols[idx.status] : "") || "Open",
         startTime: startDate.toISOString(),
         endTime: endDate.toISOString(),
         durationSeconds: !isNaN(parsedDuration) ? parsedDuration : Math.max(0, Math.floor((endDate - startDate) / 1000)),
@@ -1643,6 +1748,12 @@ function importCSV(text) {
       };
       state.entries.push(entry);
       added++;
+      // Status column (if present) sets the ticket-level status; last row for a given ticket wins
+      if (idx.status >= 0 && cols[idx.status] && ticketNumber) {
+        state.ticketStatuses[ticketNumber] = cols[idx.status].trim() || "Open";
+      } else if (ticketNumber) {
+        ensureTicketStatusExists(ticketNumber);
+      }
       if (entry.clientName && !state.autocompleteClients.includes(entry.clientName)) {
         state.autocompleteClients.push(entry.clientName);
       }
@@ -1651,7 +1762,7 @@ function importCSV(text) {
       skipped++;
     }
   }
-  saveEntries(); saveAutocomplete();
+  saveEntries(); saveAutocomplete(); saveTicketStatuses();
   render();
   toast({
     title: "CSV import complete",
@@ -1686,7 +1797,7 @@ function parseCSVLine(line) {
 function exportCSV() {
   const headers = ["Ticket #", "Client Name", "Status", "Start Time", "End Time", "Duration (seconds)", "Duration (formatted)", "Notes"];
   const rows = state.entries.map(e => [
-    e.ticketNumber, e.clientName, e.status,
+    e.ticketNumber, e.clientName, getTicketStatus(e.ticketNumber),
     new Date(e.startTime).toISOString(),
     new Date(e.endTime).toISOString(),
     e.durationSeconds || 0,
@@ -1709,6 +1820,7 @@ function exportJSON() {
     version: APP_VERSION,
     exportedAt: nowISO(),
     entries: state.entries,
+    ticketStatuses: state.ticketStatuses,
     settings: state.settings,
     autocompleteClients: state.autocompleteClients,
   };
@@ -1720,6 +1832,7 @@ async function exportEncryptedJSON(password) {
     version: APP_VERSION,
     exportedAt: nowISO(),
     entries: state.entries,
+    ticketStatuses: state.ticketStatuses,
     settings: state.settings,
     autocompleteClients: state.autocompleteClients,
   };
@@ -1888,15 +2001,24 @@ function toast({id, title, body, className, actions, persistent, timeout}) {
 // =====================================================================
 // Theme + compact mode
 // =====================================================================
+// "auto" removes the data-theme attribute entirely, letting the CSS media
+// query decide light vs dark. "light" and "dark" force the choice.
+// Mirrors the expense tracker's pattern exactly.
 function applyTheme() {
-  const t = state.settings.theme;
-  if (t === "system") {
-    const isDark = matchMedia("(prefers-color-scheme: dark)").matches;
-    document.documentElement.dataset.theme = isDark ? "dark" : "light";
+  const t = state.settings.theme; // "system" (was legacy name for auto), "light", "dark"
+  const choice = (t === "system" || t === "auto") ? "auto" : t;
+  if (choice === "auto") {
+    document.documentElement.removeAttribute("data-theme");
   } else {
-    document.documentElement.dataset.theme = t;
+    document.documentElement.setAttribute("data-theme", choice);
   }
-  document.querySelector('meta[name="theme-color"]').setAttribute("content", document.documentElement.dataset.theme === "dark" ? "#0f1114" : "#f7f8fa");
+  // Reflect effective theme in the tab-color meta tag (nice on mobile)
+  const effectiveDark = choice === "dark" || (choice === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
+  document.querySelector('meta[name="theme-color"]').setAttribute("content", effectiveDark ? "#00274C" : "#FFFFFF");
+  // Sync segmented control active state
+  document.querySelectorAll("[data-theme-choice]").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.themeChoice === choice);
+  });
 }
 
 function applyCompactMode() {
@@ -1906,21 +2028,22 @@ function applyCompactMode() {
   } else {
     document.documentElement.dataset.compact = m;
   }
+  // Sync segmented control active state
+  document.querySelectorAll("[data-compact-choice]").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.compactChoice === m);
+  });
 }
 
-// Theme toggle click (header icon only flips light/dark — "system" is a deliberate choice made in Settings, not part of this rotation)
-function cycleTheme() {
-  state.settings.theme = state.settings.theme === "light" ? "dark" : "light";
+function setTheme(choice) {
+  state.settings.theme = choice; // "auto" | "light" | "dark"
   saveSettings();
   applyTheme();
-  toast({title: `Theme: ${state.settings.theme}`, timeout: 1500});
 }
 
-function cycleCompact() {
-  state.settings.compactMode = state.settings.compactMode === "on" ? "off" : "on";
+function setCompactMode(choice) {
+  state.settings.compactMode = choice; // "auto" | "on" | "off"
   saveSettings();
   applyCompactMode();
-  toast({title: `Compact: ${state.settings.compactMode}`, timeout: 1500});
 }
 
 // =====================================================================
@@ -1946,18 +2069,24 @@ function registerSW() {
 // =====================================================================
 function init() {
   loadState();
+  // Migrate legacy theme value from the icon-toggle era
+  if (state.settings.theme === "system") { state.settings.theme = "auto"; saveSettings(); }
   applyTheme();
   applyCompactMode();
 
-  // Header controls
-  document.getElementById("theme-toggle").onclick = cycleTheme;
-  document.getElementById("compact-toggle").onclick = cycleCompact;
+  // Header controls: segmented toggles + settings icon
+  document.querySelectorAll("[data-theme-choice]").forEach(btn => {
+    btn.addEventListener("click", () => setTheme(btn.dataset.themeChoice));
+  });
+  document.querySelectorAll("[data-compact-choice]").forEach(btn => {
+    btn.addEventListener("click", () => setCompactMode(btn.dataset.compactChoice));
+  });
   document.getElementById("settings-btn").onclick = openSettings;
   document.getElementById("reload-btn").onclick = () => location.reload();
 
-  // System theme change listener
+  // System theme change listener — only matters when the user is in Auto
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
-    if (state.settings.theme === "system") applyTheme();
+    if (state.settings.theme === "auto") applyTheme();
   });
   window.addEventListener("resize", () => {
     if (state.settings.compactMode === "auto") applyCompactMode();

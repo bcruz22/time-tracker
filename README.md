@@ -1,3 +1,5 @@
+[![Time /T](logo.png)](https://bcruz22.github.io/time-tracker/)
+
 # Time /T
 
 *Track local. Save local.*

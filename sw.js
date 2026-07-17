@@ -6,6 +6,7 @@ const CORE = [
   "./",
   "./index.html",
   "./manifest.json",
+  "./logo.png",
   "./icon-180.png",
   "./icon-192.png",
   "./icon-512.png",
