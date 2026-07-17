@@ -1,0 +1,1984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1e2327">
+<meta name="description" content="Track billable time. Own your data.">
+<title>Time /T</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Time /T">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+  :root {
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --surface-2: #f0f2f5;
+    --border: #e2e5eb;
+    --border-strong: #cdd2db;
+    --text: #1a1d23;
+    --text-muted: #6b7280;
+    --text-subtle: #9ba1ac;
+    --accent: #00274C;        /* U-M Blue */
+    --accent-hover: #1B3F6B;
+    --accent-soft: rgba(0,39,76,0.10);
+    --accent-contrast: #ffffff;
+    --accent-strong: #00274C; /* always U-M Blue regardless of theme, for one-off cases needing a fixed brand color */
+    --danger: #9A3324;        /* Tappan Red */
+    --danger-soft: rgba(154,51,36,0.12);
+    --warning: #D86018;       /* Ross Orange */
+    --warning-soft: rgba(216,96,24,0.12);
+    --success: #75988D;       /* Rackham Green */
+    --success-soft: rgba(117,152,141,0.16);
+    --shadow: 0 1px 2px rgba(0,0,0,.04), 0 1px 3px rgba(0,0,0,.06);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,.08), 0 4px 10px rgba(0,0,0,.06);
+    --radius: 8px;
+    --radius-sm: 6px;
+    --radius-lg: 12px;
+    --mono: "IBM Plex Mono", "SF Mono", "Monaco", "Cascadia Code", "Roboto Mono", "Consolas", monospace;
+    --sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  html[data-theme="dark"] {
+    --bg: #0f1114;
+    --surface: #1a1d22;
+    --surface-2: #22262c;
+    --border: #2d3138;
+    --border-strong: #3a3f47;
+    --text: #e8eaed;
+    --text-muted: #9aa0a6;
+    --text-subtle: #6b7280;
+    --accent: #FFCB05;        /* U-M Maize, used as the dark-mode accent for contrast */
+    --accent-hover: #FFD633;
+    --accent-soft: rgba(255,203,5,0.16);
+    --accent-contrast: #00274C;
+    --danger: #E2694B;
+    --danger-soft: rgba(226,105,75,0.18);
+    --warning: #F08A3C;
+    --warning-soft: rgba(240,138,60,0.18);
+    --success: #8FB6AA;
+    --success-soft: rgba(143,182,170,0.18);
+    --shadow: 0 1px 2px rgba(0,0,0,.2), 0 1px 3px rgba(0,0,0,.25);
+    --shadow-lg: 0 10px 25px rgba(0,0,0,.3), 0 4px 10px rgba(0,0,0,.2);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  body { min-height: 100vh; padding-bottom: env(safe-area-inset-bottom); }
+  button { font-family: inherit; font-size: inherit; cursor: pointer; border: none; background: none; color: inherit; padding: 0; }
+  input, select, textarea { font-family: inherit; font-size: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 10px; outline: none; transition: border-color .12s, box-shadow .12s; width: 100%; min-width: 0; }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  textarea { resize: vertical; min-height: 60px; font-family: inherit; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Layout */
+  #app { max-width: 1100px; margin: 0 auto; padding: 16px; }
+
+  /* Header */
+  .app-header { display: flex; align-items: center; gap: 16px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .brand { font-family: var(--mono); font-size: 22px; font-weight: 600; letter-spacing: -0.02em; display: flex; align-items: baseline; gap: 2px; }
+  .brand-slash { color: var(--accent); }
+  .brand-t { color: var(--accent); }
+  .totals { display: flex; gap: 16px; flex: 1; flex-wrap: wrap; }
+  .total-pill { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px; display: flex; flex-direction: column; gap: 2px; box-shadow: var(--shadow); }
+  .total-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
+  .total-value { font-family: var(--mono); font-size: 16px; font-weight: 600; color: var(--text); }
+  .header-controls { display: flex; gap: 6px; }
+  .icon-btn { width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); color: var(--text-muted); transition: background .12s, color .12s; }
+  .icon-btn:hover { background: var(--surface-2); color: var(--text); }
+  .icon-btn svg { width: 18px; height: 18px; }
+
+  /* Sections */
+  section { margin-bottom: 24px; }
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .section-header h2 { margin: 0; font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .section-actions { display: flex; gap: 8px; margin-left: auto; }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 12px; border-radius: var(--radius-sm); font-weight: 500; font-size: 13px; transition: background .12s, border-color .12s, color .12s; border: 1px solid transparent; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-secondary { background: var(--surface); border-color: var(--border); color: var(--text); }
+  .btn-secondary:hover { background: var(--surface-2); border-color: var(--border-strong); }
+  .btn-danger { background: var(--surface); border-color: var(--border); color: var(--danger); }
+  .btn-danger:hover { background: var(--danger-soft); border-color: var(--danger); }
+  .btn-ghost { background: transparent; color: var(--text-muted); }
+  .btn-ghost:hover { background: var(--surface-2); color: var(--text); }
+  .btn-sm { padding: 4px 8px; font-size: 12px; }
+  .btn-icon { padding: 6px; }
+  .btn-icon svg { width: 15px; height: 15px; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Timer cards */
+  .timer-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 12px; }
+  .timer-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px; box-shadow: var(--shadow); position: relative; display: flex; flex-direction: column; gap: 10px; transition: border-color .15s; min-width: 0; }
+  .timer-card.running { border-color: var(--success); }
+  .timer-card.paused { border-color: var(--warning); }
+  .timer-card.completed { border-color: var(--accent); background: var(--surface-2); }
+  .timer-card-top { display: flex; align-items: flex-start; gap: 10px; }
+  .timer-card-fields { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; min-width: 0; }
+  .timer-card-fields .field-full { grid-column: 1 / -1; }
+  .timer-card-clock-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; min-width: 120px; }
+  .timer-clock { font-family: var(--mono); font-size: 24px; font-weight: 600; letter-spacing: -0.02em; color: var(--text); font-variant-numeric: tabular-nums; }
+  .timer-card.running .timer-clock { color: var(--success); }
+  .timer-card.paused .timer-clock { color: var(--warning); }
+  .timer-card.completed .timer-clock { color: var(--accent); }
+  .timer-status-badge { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-subtle); }
+  .running .status-dot { background: var(--success); animation: pulse 1.6s ease-in-out infinite; }
+  .paused .status-dot { background: var(--warning); }
+  .completed .status-dot { background: var(--accent); }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .idle-warning-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warning); margin-left: 4px; box-shadow: 0 0 0 3px var(--warning-soft); }
+  .timer-notes { min-height: 44px; }
+  .timer-card-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .timer-card-actions .btn { flex: 1; min-width: 0; }
+  .field-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 500; margin-bottom: 2px; display: block; }
+  .field-group { display: flex; flex-direction: column; min-width: 0; }
+  .card-remove-btn { position: absolute; top: -8px; right: -8px; width: 22px; height: 22px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 16px; line-height: 1; z-index: 2; }
+  .card-remove-btn:hover { background: var(--danger-soft); color: var(--danger); }
+
+  /* Add timer button */
+  .add-timer-card { background: transparent; border: 2px dashed var(--border); border-radius: var(--radius-lg); padding: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text-muted); min-height: 140px; transition: border-color .15s, color .15s, background .15s; }
+  .add-timer-card:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
+  .add-timer-card:disabled:hover { border-color: var(--border); color: var(--text-muted); background: transparent; }
+
+  /* Entry log */
+  .ticket-group { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 10px; box-shadow: var(--shadow); overflow: hidden; }
+  .ticket-header { display: flex; align-items: center; gap: 10px; padding: 12px 14px; cursor: pointer; background: var(--surface); transition: background .1s; }
+  .ticket-header:hover { background: var(--surface-2); }
+  .ticket-caret { color: var(--text-muted); transition: transform .15s; flex-shrink: 0; }
+  .ticket-group.expanded .ticket-caret { transform: rotate(90deg); }
+  .ticket-number { font-family: var(--mono); font-weight: 600; color: var(--text); }
+  .ticket-client { color: var(--text-muted); font-size: 13px; }
+  .ticket-status { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+  .ticket-status.open { background: var(--success-soft); color: var(--success); }
+  .ticket-status.waiting-customer, .ticket-status.waiting-internal { background: var(--warning-soft); color: var(--warning); }
+  .ticket-status.closed { background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border); }
+  .ticket-total { font-family: var(--mono); font-weight: 600; color: var(--text); margin-left: auto; font-variant-numeric: tabular-nums; }
+  .ticket-header-actions { display: flex; gap: 4px; }
+  .ticket-body { display: none; padding: 0 14px 12px; border-top: 1px solid var(--border); }
+  .ticket-group.expanded .ticket-body { display: block; }
+  .day-group { padding-top: 10px; }
+  .day-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
+  .session-row { display: flex; align-items: flex-start; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .session-row:last-child { border-bottom: none; }
+  .session-time { font-family: var(--mono); font-size: 12px; color: var(--text-muted); white-space: nowrap; min-width: 130px; font-variant-numeric: tabular-nums; }
+  .session-duration { font-family: var(--mono); font-size: 12px; color: var(--text); font-weight: 500; margin-left: 4px; }
+  .session-notes { flex: 1; color: var(--text); white-space: pre-wrap; word-break: break-word; font-size: 13px; }
+  .session-notes.empty { color: var(--text-subtle); font-style: italic; }
+  .session-actions { display: flex; gap: 4px; flex-shrink: 0; }
+
+  /* Closed section */
+  .closed-section { margin-top: 20px; }
+  .closed-header { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); cursor: pointer; color: var(--text-muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+  .closed-header:hover { background: var(--surface); }
+  .closed-body { display: none; margin-top: 10px; }
+  .closed-section.expanded .closed-body { display: block; }
+  .closed-section .ticket-caret { transition: transform .15s; }
+  .closed-section.expanded .ticket-caret { transform: rotate(90deg); }
+  .closed-count { margin-left: auto; }
+
+  /* Empty state */
+  .empty-state { text-align: center; padding: 32px 16px; color: var(--text-muted); font-size: 13px; background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius-lg); }
+
+  /* Modal */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 16px; overflow-y: auto; }
+  .modal { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); max-width: 520px; width: 100%; max-height: 90vh; overflow-y: auto; }
+  .modal-header { display: flex; align-items: center; padding: 16px; border-bottom: 1px solid var(--border); }
+  .modal-title { font-size: 15px; font-weight: 600; margin: 0; flex: 1; }
+  .modal-close { color: var(--text-muted); }
+  .modal-body { padding: 16px; }
+  .modal-footer { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); justify-content: flex-end; flex-wrap: wrap; }
+  .modal-section { margin-bottom: 16px; }
+  .modal-section:last-child { margin-bottom: 0; }
+  .modal-section h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin: 0 0 8px; font-weight: 600; }
+  .settings-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+  .settings-row label { flex: 1; font-size: 13px; }
+  .settings-row .settings-control { flex-shrink: 0; }
+
+  /* Form */
+  .form-row { margin-bottom: 12px; }
+  .form-row label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 500; margin-bottom: 4px; }
+  .form-row input, .form-row select, .form-row textarea { width: 100%; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* Toast */
+  #toast-container { position: fixed; bottom: 16px; right: 16px; z-index: 200; display: flex; flex-direction: column; gap: 8px; max-width: 380px; pointer-events: none; }
+  .toast { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; box-shadow: var(--shadow-lg); pointer-events: auto; animation: slideIn .2s ease-out; display: flex; flex-direction: column; gap: 8px; }
+  .toast.warning { border-left: 3px solid var(--warning); }
+  .toast.success { border-left: 3px solid var(--success); }
+  .toast.error { border-left: 3px solid var(--danger); }
+  .toast-title { font-weight: 600; font-size: 13px; }
+  .toast-body { font-size: 13px; color: var(--text-muted); }
+  .toast-actions { display: flex; gap: 6px; }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Update banner */
+  .update-banner { position: fixed; top: 16px; left: 50%; transform: translateX(-50%); background: var(--accent); color: white; padding: 10px 16px; border-radius: var(--radius); box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; z-index: 150; font-size: 13px; font-weight: 500; }
+
+  /* Password strength meter */
+  .password-strength { margin-top: 8px; }
+  .password-strength-bar { height: 4px; background: var(--surface-2); border-radius: 2px; overflow: hidden; }
+  .password-strength-fill { height: 100%; transition: width .2s, background .2s; }
+  .password-strength-fill.weak { background: var(--danger); width: 25%; }
+  .password-strength-fill.fair { background: var(--warning); width: 50%; }
+  .password-strength-fill.good { background: #eab308; width: 75%; }
+  .password-strength-fill.strong { background: var(--success); width: 100%; }
+  .password-requirements { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+  .password-requirements ul { margin: 4px 0 0; padding-left: 16px; }
+  .password-requirements li.met { color: var(--success); }
+  .password-requirements li.met::marker { color: var(--success); }
+
+  /* Compact mode */
+  html[data-compact="on"] .timer-card { padding: 10px; gap: 6px; }
+  html[data-compact="on"] .field-label { display: none; }
+  html[data-compact="on"] .timer-clock { font-size: 18px; }
+  html[data-compact="on"] .timer-card-clock-wrap { min-width: 90px; }
+  html[data-compact="on"] .timer-notes { min-height: 28px; }
+  html[data-compact="on"] .timer-card-fields { gap: 6px; }
+  html[data-compact="on"] .totals { gap: 8px; }
+  html[data-compact="on"] .total-pill { padding: 5px 8px; }
+  html[data-compact="on"] .total-value { font-size: 13px; }
+  html[data-compact="on"] .total-label { font-size: 10px; }
+  html[data-compact="on"] .session-row { padding: 5px 0; }
+  html[data-compact="on"] .day-group { padding-top: 6px; }
+  html[data-compact="on"] .day-label { margin-bottom: 4px; }
+  html[data-compact="on"] .ticket-header { padding: 8px 10px; }
+  html[data-compact="on"] .ticket-body { padding: 0 10px 8px; }
+  html[data-compact="on"] .session-notes { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+  html[data-compact="on"] .session-notes.expanded { white-space: pre-wrap; overflow: visible; text-overflow: unset; }
+  html[data-compact="on"] .session-time { min-width: 100px; font-size: 11px; }
+  html[data-compact="on"] .brand { font-size: 18px; }
+  html[data-compact="on"] .btn { padding: 5px 10px; }
+  html[data-compact="on"] .app-header { padding-bottom: 10px; margin-bottom: 10px; }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    #app { padding: 12px; }
+    .app-header { gap: 10px; }
+    .totals { width: 100%; order: 3; }
+    .header-controls { margin-left: auto; }
+    .timer-cards { grid-template-columns: 1fr; }
+    .timer-card-fields { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+    .modal-backdrop { padding: 8px; align-items: flex-start; padding-top: 24px; }
+  }
+
+  /* Utility */
+  .hidden { display: none !important; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+</style>
+</head>
+<body>
+<div id="update-banner" class="update-banner hidden">
+  New version available
+  <button class="btn btn-sm" id="reload-btn" style="background: white; color: var(--accent);">Reload</button>
+</div>
+
+<div id="app">
+  <header class="app-header">
+    <div class="brand">Time<span class="brand-slash">/</span><span class="brand-t">T</span></div>
+    <div class="totals" id="totals"></div>
+    <div class="header-controls">
+      <button class="icon-btn" id="compact-toggle" title="Toggle compact mode" aria-label="Toggle compact mode">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <button class="icon-btn" id="theme-toggle" title="Toggle theme" aria-label="Toggle theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="icon-btn" id="settings-btn" title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <section id="timers-section">
+    <div class="section-header">
+      <h2>Active Timers</h2>
+      <div class="section-actions">
+        <button class="btn btn-secondary btn-sm hidden" id="stop-all-btn">Stop all timers</button>
+      </div>
+    </div>
+    <div class="timer-cards" id="timer-cards"></div>
+  </section>
+
+  <section id="log-section">
+    <div class="section-header">
+      <h2>Log</h2>
+    </div>
+    <div id="ticket-groups"></div>
+    <div id="closed-section-container"></div>
+    <div id="empty-log" class="empty-state hidden">No completed entries yet. Start a timer above to begin.</div>
+  </section>
+</div>
+
+<datalist id="client-suggestions"></datalist>
+
+<div id="modal-root"></div>
+<div id="toast-container"></div>
+
+<script>
+/* =====================================================================
+   Time /T  -  Track local. Save local.
+   Single-file app. All state in localStorage. No servers.
+   ===================================================================== */
+
+const APP_VERSION = "0.1.0";
+const APP_NAME = "Time /T";
+const MAX_TIMERS = 10;
+const HEARTBEAT_MS = 10_000;
+const TICK_MS = 500;
+const CRASH_RECOVERY_THRESHOLD_MS = 30 * 60 * 1000;
+const PBKDF2_ITERATIONS = 250_000;
+
+const K = {
+  entries: "timetrack.entries",
+  activeTimers: "timetrack.activeTimers",
+  settings: "timetrack.settings",
+  autocomplete: "timetrack.autocomplete",
+  lastVersion: "timetrack.lastVersion",
+};
+
+const DEFAULT_SETTINGS = {
+  theme: "system",           // "light" | "dark" | "system"
+  compactMode: "auto",       // "auto" | "on" | "off"
+  idleThresholdMinutes: 60,
+  weekStartDay: 1,           // 0 = Sunday, 1 = Monday
+};
+
+const STATUS_OPTIONS = ["Open", "Waiting on Customer", "Waiting on Internal", "Closed"];
+
+// =====================================================================
+// State
+// =====================================================================
+let state = {
+  entries: [],
+  activeTimers: [],
+  settings: {...DEFAULT_SETTINGS},
+  autocompleteClients: [],
+  expandedTickets: new Set(),
+  closedExpanded: false,
+  idleAcknowledged: {}, // timerId -> bool
+};
+
+// =====================================================================
+// Storage
+// =====================================================================
+function loadState() {
+  try {
+    const entries = JSON.parse(localStorage.getItem(K.entries) || "[]");
+    const activeTimers = JSON.parse(localStorage.getItem(K.activeTimers) || "[]");
+    const settings = {...DEFAULT_SETTINGS, ...JSON.parse(localStorage.getItem(K.settings) || "{}")};
+    const autocomplete = JSON.parse(localStorage.getItem(K.autocomplete) || "{}");
+    state.entries = Array.isArray(entries) ? entries : [];
+    state.activeTimers = Array.isArray(activeTimers) ? activeTimers : [];
+    state.settings = settings;
+    state.autocompleteClients = Array.isArray(autocomplete.clients) ? autocomplete.clients : [];
+  } catch (e) {
+    console.error("Load failed:", e);
+  }
+}
+
+function safeSetItem(key, value, label) {
+  try {
+    localStorage.setItem(key, value);
+    return true;
+  } catch (e) {
+    console.error(`Save failed (${label}):`, e);
+    toast({title: "Save failed", body: `Could not save ${label}. Storage may be full or blocked in this browser.`, className: "error", timeout: 6000});
+    return false;
+  }
+}
+function saveEntries() { safeSetItem(K.entries, JSON.stringify(state.entries), "entries"); }
+function saveActiveTimers() { safeSetItem(K.activeTimers, JSON.stringify(state.activeTimers), "timers"); }
+function saveSettings() { safeSetItem(K.settings, JSON.stringify(state.settings), "settings"); }
+function saveAutocomplete() { safeSetItem(K.autocomplete, JSON.stringify({clients: state.autocompleteClients}), "autocomplete history"); }
+function saveAll() { saveEntries(); saveActiveTimers(); saveSettings(); saveAutocomplete(); }
+
+// =====================================================================
+// Helpers
+// =====================================================================
+function uuid() {
+  if (crypto.randomUUID) return crypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0;
+    return (c === "x" ? r : (r & 0x3 | 0x8)).toString(16);
+  });
+}
+
+function nowISO() { return new Date().toISOString(); }
+function nowMs() { return Date.now(); }
+
+function formatClock(seconds) {
+  seconds = Math.max(0, Math.floor(seconds));
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+
+function formatDuration(seconds) {
+  seconds = Math.max(0, Math.floor(seconds));
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h === 0 && m === 0) return `${seconds}s`;
+  if (h === 0) return `${m}m`;
+  return `${h}h ${m}m`;
+}
+
+function formatTimeOfDay(iso) {
+  const d = new Date(iso);
+  return d.toLocaleTimeString([], {hour: "numeric", minute: "2-digit"});
+}
+
+function formatDateLabel(dateStr) {
+  const today = new Date();
+  const d = new Date(dateStr + "T00:00:00");
+  const todayStr = ymd(today);
+  const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
+  const yesterdayStr = ymd(yesterday);
+  if (dateStr === todayStr) return "Today";
+  if (dateStr === yesterdayStr) return "Yesterday";
+  return d.toLocaleDateString([], {weekday: "short", month: "short", day: "numeric"});
+}
+
+function ymd(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function statusClass(status) {
+  const map = {
+    "Open": "open",
+    "Waiting on Customer": "waiting-customer",
+    "Waiting on Internal": "waiting-internal",
+    "Closed": "closed",
+  };
+  return map[status] || "open";
+}
+
+function escapeHTML(str) {
+  if (str == null) return "";
+  return String(str).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[c]);
+}
+
+// =====================================================================
+// Timer elapsed calculation
+// =====================================================================
+function calculateElapsed(timer) {
+  const base = timer.accumulatedSeconds || 0;
+  if (timer.state === "running" && timer.currentSegmentStart) {
+    const segmentSec = (nowMs() - new Date(timer.currentSegmentStart).getTime()) / 1000;
+    return base + Math.max(0, segmentSec);
+  }
+  return base;
+}
+
+// =====================================================================
+// Timer actions
+// =====================================================================
+function createEmptyTimerObject() {
+  return {
+    id: uuid(),
+    clientName: "",
+    ticketNumber: "",
+    status: "Open",
+    notes: "",
+    createdAt: nowISO(),
+    state: "empty", // "empty" | "running" | "paused" | "completed"
+    accumulatedSeconds: 0,
+    currentSegmentStart: null,
+    startedAt: null,  // ISO time of first start (for entry startTime)
+    lastHeartbeat: nowISO(),
+    savedEntryId: null, // set once stopped -> entry created
+  };
+}
+
+function addTimer() {
+  if (state.activeTimers.length >= MAX_TIMERS) {
+    toast({title: "Timer limit reached", body: `You can have up to ${MAX_TIMERS} active timers at once.`});
+    return;
+  }
+  state.activeTimers.push(createEmptyTimerObject());
+  saveActiveTimers();
+  render();
+}
+
+function removeTimer(id) {
+  const t = state.activeTimers.find(x => x.id === id);
+  if (!t) return;
+  if (t.state === "running" || t.state === "paused") {
+    if (!confirm("This timer is still active. Remove it and discard the session?")) return;
+  }
+  state.activeTimers = state.activeTimers.filter(x => x.id !== id);
+  delete state.idleAcknowledged[id];
+  saveActiveTimers();
+  render();
+}
+
+function startTimer(id) {
+  const t = state.activeTimers.find(x => x.id === id);
+  if (!t) return;
+  const now = nowISO();
+  t.state = "running";
+  t.currentSegmentStart = now;
+  t.lastHeartbeat = now;
+  if (!t.startedAt) t.startedAt = now;
+  saveActiveTimers();
+  render();
+}
+
+function pauseTimer(id) {
+  const t = state.activeTimers.find(x => x.id === id);
+  if (!t || t.state !== "running") return;
+  const segmentSec = (nowMs() - new Date(t.currentSegmentStart).getTime()) / 1000;
+  t.accumulatedSeconds = (t.accumulatedSeconds || 0) + Math.max(0, segmentSec);
+  t.currentSegmentStart = null;
+  t.state = "paused";
+  t.lastHeartbeat = nowISO();
+  saveActiveTimers();
+  render();
+}
+
+function resumeTimer(id) {
+  const t = state.activeTimers.find(x => x.id === id);
+  if (!t || t.state !== "paused") return;
+  t.state = "running";
+  t.currentSegmentStart = nowISO();
+  t.lastHeartbeat = nowISO();
+  saveActiveTimers();
+  render();
+}
+
+function stopTimer(id, options = {}) {
+  const t = state.activeTimers.find(x => x.id === id);
+  if (!t) return;
+  // Seal current segment
+  if (t.state === "running" && t.currentSegmentStart) {
+    const segmentSec = (nowMs() - new Date(t.currentSegmentStart).getTime()) / 1000;
+    t.accumulatedSeconds = (t.accumulatedSeconds || 0) + Math.max(0, segmentSec);
+    t.currentSegmentStart = null;
+  }
+  // Validate required fields
+  if (!options.skipValidation) {
+    if (!t.clientName.trim() || !t.ticketNumber.trim()) {
+      openIncompleteStopModal(t);
+      return;
+    }
+  }
+  // Create entry
+  const entry = {
+    id: t.savedEntryId || uuid(),
+    ticketNumber: t.ticketNumber.trim(),
+    clientName: t.clientName.trim(),
+    status: t.status,
+    notes: t.notes,
+    startTime: t.startedAt,
+    endTime: nowISO(),
+    durationSeconds: Math.floor(t.accumulatedSeconds),
+    createdAt: t.createdAt,
+    updatedAt: nowISO(),
+  };
+  // Add or update
+  const existingIdx = state.entries.findIndex(e => e.id === entry.id);
+  if (existingIdx >= 0) state.entries[existingIdx] = entry;
+  else state.entries.push(entry);
+  // Update autocomplete
+  if (entry.clientName && !state.autocompleteClients.includes(entry.clientName)) {
+    state.autocompleteClients.push(entry.clientName);
+    saveAutocomplete();
+  }
+  // Auto-expand the ticket group so tech sees the newly saved session
+  state.expandedTickets.add(entry.ticketNumber);
+  // Mark timer completed
+  t.state = "completed";
+  t.savedEntryId = entry.id;
+  t.lastHeartbeat = nowISO();
+  saveEntries();
+  saveActiveTimers();
+  delete state.idleAcknowledged[t.id];
+  render();
+}
+
+function stopAllTimers() {
+  const running = state.activeTimers.filter(t => t.state === "running" || t.state === "paused");
+  if (running.length === 0) return;
+  const incomplete = running.filter(t => !t.clientName.trim() || !t.ticketNumber.trim());
+  if (incomplete.length > 0) {
+    openStopAllIncompleteModal(running, incomplete);
+    return;
+  }
+  running.forEach(t => stopTimer(t.id));
+}
+
+function startAgain(id) {
+  // Turn completed timer into a fresh running one with same Client/Ticket/Status
+  const t = state.activeTimers.find(x => x.id === id);
+  if (!t) return;
+  const now = nowISO();
+  t.state = "running";
+  t.accumulatedSeconds = 0;
+  t.currentSegmentStart = now;
+  t.startedAt = now;
+  t.notes = "";
+  t.savedEntryId = null;
+  t.createdAt = now;
+  t.lastHeartbeat = now;
+  saveActiveTimers();
+  render();
+}
+
+function clearTimer(id) {
+  const t = state.activeTimers.find(x => x.id === id);
+  if (!t) return;
+  t.clientName = "";
+  t.ticketNumber = "";
+  t.status = "Open";
+  t.notes = "";
+  t.state = "empty";
+  t.accumulatedSeconds = 0;
+  t.currentSegmentStart = null;
+  t.startedAt = null;
+  t.savedEntryId = null;
+  t.lastHeartbeat = nowISO();
+  t.createdAt = nowISO();
+  saveActiveTimers();
+  render();
+}
+
+function updateTimerField(id, field, value) {
+  const t = state.activeTimers.find(x => x.id === id);
+  if (!t) return;
+  t[field] = value;
+  t.lastHeartbeat = nowISO();
+  saveActiveTimers();
+  // No full re-render on typing; totals do not depend on active timer field values.
+}
+
+// =====================================================================
+// Entry actions
+// =====================================================================
+function deleteEntry(id) {
+  if (!confirm("Delete this entry? This cannot be undone.")) return;
+  state.entries = state.entries.filter(e => e.id !== id);
+  saveEntries();
+  render();
+}
+
+function openEditEntry(id) {
+  const entry = state.entries.find(e => e.id === id);
+  if (!entry) return;
+  openEditModal(entry);
+}
+
+function updateEntry(id, updates) {
+  const entry = state.entries.find(e => e.id === id);
+  if (!entry) return;
+  Object.assign(entry, updates);
+  // Recalculate duration from start/end
+  if (updates.startTime || updates.endTime) {
+    const startMs = new Date(entry.startTime).getTime();
+    const endMs = new Date(entry.endTime).getTime();
+    if (!isNaN(startMs) && !isNaN(endMs) && endMs >= startMs) {
+      entry.durationSeconds = Math.floor((endMs - startMs) / 1000);
+    }
+  }
+  entry.updatedAt = nowISO();
+  // Update autocomplete
+  if (entry.clientName && !state.autocompleteClients.includes(entry.clientName)) {
+    state.autocompleteClients.push(entry.clientName);
+    saveAutocomplete();
+  }
+  saveEntries();
+  render();
+}
+
+// =====================================================================
+// Grouping
+// =====================================================================
+function groupEntries() {
+  const groups = {};
+  for (const e of state.entries) {
+    const key = e.ticketNumber || "(no ticket)";
+    if (!groups[key]) groups[key] = {ticketNumber: key, sessions: [], totalSeconds: 0, latestStatus: e.status, latestUpdatedAt: e.updatedAt, clientName: e.clientName};
+    groups[key].sessions.push(e);
+    groups[key].totalSeconds += (e.durationSeconds || 0);
+    if (new Date(e.updatedAt).getTime() > new Date(groups[key].latestUpdatedAt).getTime()) {
+      groups[key].latestStatus = e.status;
+      groups[key].latestUpdatedAt = e.updatedAt;
+      groups[key].clientName = e.clientName;
+    }
+  }
+  return Object.values(groups);
+}
+
+function groupSessionsByDay(sessions) {
+  const days = {};
+  for (const s of sessions) {
+    const day = ymd(new Date(s.startTime));
+    if (!days[day]) days[day] = [];
+    days[day].push(s);
+  }
+  // Sort days desc, sessions within day asc by startTime
+  const sorted = Object.keys(days).sort((a, b) => b.localeCompare(a));
+  return sorted.map(day => ({
+    day,
+    sessions: days[day].sort((a, b) => new Date(a.startTime) - new Date(b.startTime)),
+  }));
+}
+
+// =====================================================================
+// Totals
+// =====================================================================
+function totalsForRanges() {
+  const now = new Date();
+  const todayStart = new Date(now); todayStart.setHours(0,0,0,0);
+  const weekStart = getWeekStart(now);
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  let today = 0, week = 0, month = 0;
+  for (const e of state.entries) {
+    const start = new Date(e.startTime).getTime();
+    const dur = e.durationSeconds || 0;
+    if (start >= todayStart.getTime()) today += dur;
+    if (start >= weekStart.getTime()) week += dur;
+    if (start >= monthStart.getTime()) month += dur;
+  }
+  return {today, week, month};
+}
+
+function getWeekStart(date) {
+  const d = new Date(date);
+  const day = d.getDay(); // 0=Sun ... 6=Sat
+  const weekStartDay = state.settings.weekStartDay;
+  const diff = (day - weekStartDay + 7) % 7;
+  d.setDate(d.getDate() - diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+// =====================================================================
+// Rendering
+// =====================================================================
+function render() {
+  if (state.activeTimers.length === 0) {
+    state.activeTimers.unshift(createEmptyTimerObject());
+    saveActiveTimers();
+  }
+  renderTotals();
+  renderTimers();
+  renderLog();
+  renderClientDatalist();
+  renderStopAllButton();
+}
+
+function renderTotals() {
+  const {today, week, month} = totalsForRanges();
+  document.getElementById("totals").innerHTML = `
+    <div class="total-pill"><span class="total-label">Today</span><span class="total-value">${formatDuration(today)}</span></div>
+    <div class="total-pill"><span class="total-label">This Week</span><span class="total-value">${formatDuration(week)}</span></div>
+    <div class="total-pill"><span class="total-label">This Month</span><span class="total-value">${formatDuration(month)}</span></div>
+  `;
+}
+
+function renderTimers() {
+  const container = document.getElementById("timer-cards");
+  if (state.activeTimers.length === 0) return; // render() guarantees at least one; defensive no-op only
+  container.innerHTML = "";
+  for (const t of state.activeTimers) container.appendChild(timerCardEl(t));
+  const addBtn = document.createElement("button");
+  addBtn.className = "add-timer-card";
+  addBtn.disabled = state.activeTimers.length >= MAX_TIMERS;
+  addBtn.title = addBtn.disabled ? `Maximum ${MAX_TIMERS} timers` : "Add another timer";
+  addBtn.innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <span>Add timer${state.activeTimers.length >= MAX_TIMERS ? ` (max ${MAX_TIMERS})` : ""}</span>
+  `;
+  addBtn.onclick = () => addTimer();
+  container.appendChild(addBtn);
+}
+
+function timerCardEl(t) {
+  const card = document.createElement("div");
+  card.className = `timer-card ${t.state === "empty" ? "" : t.state}`;
+  card.dataset.timerId = t.id;
+  const elapsed = calculateElapsed(t);
+  const stateLabel = {empty: "Ready", running: "Running", paused: "Paused", completed: "Completed"}[t.state] || "Ready";
+  const idleFlag = state.idleAcknowledged[t.id] && t.state === "running";
+
+  const actionsHTML = renderTimerActions(t);
+
+  card.innerHTML = `
+    <button class="card-remove-btn" title="Remove timer" data-action="remove">×</button>
+    <div class="timer-card-top">
+      <div class="timer-card-fields">
+        <div class="field-group">
+          <label class="field-label">Client</label>
+          <input type="text" list="client-suggestions" data-field="clientName" value="${escapeHTML(t.clientName)}" placeholder="Client name" ${t.state === "completed" ? "readonly" : ""}>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Ticket #</label>
+          <input type="text" data-field="ticketNumber" value="${escapeHTML(t.ticketNumber)}" placeholder="Ticket number" ${t.state === "completed" ? "readonly" : ""}>
+        </div>
+        <div class="field-group field-full">
+          <label class="field-label">Status</label>
+          <select data-field="status" ${t.state === "completed" ? "disabled" : ""}>
+            ${STATUS_OPTIONS.map(s => `<option value="${s}" ${t.status === s ? "selected" : ""}>${s}</option>`).join("")}
+          </select>
+        </div>
+      </div>
+      <div class="timer-card-clock-wrap">
+        <div class="timer-clock" data-clock>${formatClock(elapsed)}</div>
+        <div class="timer-status-badge">
+          <span class="status-dot"></span>
+          ${stateLabel}
+          ${idleFlag ? '<span class="idle-warning-dot" title="Idle warning acknowledged"></span>' : ""}
+        </div>
+      </div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Notes</label>
+      <textarea class="timer-notes" data-field="notes" placeholder="What are you working on?" ${t.state === "completed" ? "readonly" : ""}>${escapeHTML(t.notes)}</textarea>
+    </div>
+    <div class="timer-card-actions">${actionsHTML}</div>
+  `;
+
+  // Wire up inputs
+  card.querySelectorAll("[data-field]").forEach(el => {
+    el.addEventListener("input", () => updateTimerField(t.id, el.dataset.field, el.value));
+    el.addEventListener("change", () => updateTimerField(t.id, el.dataset.field, el.value));
+  });
+
+  // Wire up buttons
+  card.querySelectorAll("[data-action]").forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const action = btn.dataset.action;
+      if (action === "remove") removeTimer(t.id);
+      else if (action === "start") startTimer(t.id);
+      else if (action === "pause") pauseTimer(t.id);
+      else if (action === "resume") resumeTimer(t.id);
+      else if (action === "stop") stopTimer(t.id);
+      else if (action === "startAgain") startAgain(t.id);
+      else if (action === "clear") clearTimer(t.id);
+    };
+  });
+
+  return card;
+}
+
+function renderTimerActions(t) {
+  if (t.state === "empty") {
+    return `<button class="btn btn-primary" data-action="start">Start</button>`;
+  }
+  if (t.state === "running") {
+    return `
+      <button class="btn btn-secondary" data-action="pause">Pause</button>
+      <button class="btn btn-primary" data-action="stop">Stop</button>
+    `;
+  }
+  if (t.state === "paused") {
+    return `
+      <button class="btn btn-primary" data-action="resume">Resume</button>
+      <button class="btn btn-secondary" data-action="stop">Stop</button>
+    `;
+  }
+  if (t.state === "completed") {
+    return `
+      <button class="btn btn-primary" data-action="startAgain">Start Again</button>
+      <button class="btn btn-secondary" data-action="clear">Clear</button>
+    `;
+  }
+  return "";
+}
+
+function renderLog() {
+  const container = document.getElementById("ticket-groups");
+  const closedContainer = document.getElementById("closed-section-container");
+  const empty = document.getElementById("empty-log");
+  const groups = groupEntries();
+  if (groups.length === 0) {
+    container.innerHTML = "";
+    closedContainer.innerHTML = "";
+    empty.classList.remove("hidden");
+    return;
+  }
+  empty.classList.add("hidden");
+  // Split active vs closed
+  const active = groups.filter(g => g.latestStatus !== "Closed");
+  const closed = groups.filter(g => g.latestStatus === "Closed");
+  // Sort: most recently updated first
+  active.sort((a, b) => new Date(b.latestUpdatedAt) - new Date(a.latestUpdatedAt));
+  closed.sort((a, b) => new Date(b.latestUpdatedAt) - new Date(a.latestUpdatedAt));
+
+  container.innerHTML = "";
+  for (const g of active) container.appendChild(ticketGroupEl(g));
+
+  if (closed.length > 0) {
+    closedContainer.innerHTML = "";
+    const section = document.createElement("div");
+    section.className = "closed-section" + (state.closedExpanded ? " expanded" : "");
+    section.innerHTML = `
+      <div class="closed-header" data-toggle-closed>
+        <svg class="ticket-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>Closed</span>
+        <span class="closed-count">${closed.length} ${closed.length === 1 ? "ticket" : "tickets"} · ${formatDuration(closed.reduce((s,g)=>s+g.totalSeconds,0))}</span>
+      </div>
+      <div class="closed-body"></div>
+    `;
+    const body = section.querySelector(".closed-body");
+    for (const g of closed) body.appendChild(ticketGroupEl(g));
+    section.querySelector("[data-toggle-closed]").onclick = () => {
+      state.closedExpanded = !state.closedExpanded;
+      section.classList.toggle("expanded");
+    };
+    closedContainer.appendChild(section);
+  } else {
+    closedContainer.innerHTML = "";
+  }
+}
+
+function ticketGroupEl(g) {
+  const el = document.createElement("div");
+  const expanded = state.expandedTickets.has(g.ticketNumber);
+  el.className = "ticket-group" + (expanded ? " expanded" : "");
+  const days = groupSessionsByDay(g.sessions);
+  el.innerHTML = `
+    <div class="ticket-header" data-toggle>
+      <svg class="ticket-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="9 18 15 12 9 6"/></svg>
+      <span class="ticket-number">${escapeHTML(g.ticketNumber)}</span>
+      <span class="ticket-client">${escapeHTML(g.clientName || "")}</span>
+      <span class="ticket-status ${statusClass(g.latestStatus)}">${escapeHTML(g.latestStatus)}</span>
+      <span class="ticket-total">${formatDuration(g.totalSeconds)}</span>
+      <div class="ticket-header-actions">
+        <button class="btn btn-ghost btn-sm btn-icon" title="Copy all notes" data-copy-group>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="ticket-body"></div>
+  `;
+  const body = el.querySelector(".ticket-body");
+  for (const d of days) {
+    const dayGroup = document.createElement("div");
+    dayGroup.className = "day-group";
+    dayGroup.innerHTML = `<div class="day-label">${escapeHTML(formatDateLabel(d.day))}</div>`;
+    for (const s of d.sessions) dayGroup.appendChild(sessionRowEl(s));
+    body.appendChild(dayGroup);
+  }
+  el.querySelector("[data-toggle]").onclick = (e) => {
+    if (e.target.closest("[data-copy-group]")) return;
+    if (state.expandedTickets.has(g.ticketNumber)) state.expandedTickets.delete(g.ticketNumber);
+    else state.expandedTickets.add(g.ticketNumber);
+    el.classList.toggle("expanded");
+  };
+  el.querySelector("[data-copy-group]").onclick = (e) => {
+    e.stopPropagation();
+    const combined = g.sessions
+      .slice()
+      .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
+      .map(s => s.notes || "")
+      .filter(s => s.trim() !== "")
+      .join("\n\n");
+    if (!combined) { toast({title: "No notes to copy", className: "warning"}); return; }
+    copyToClipboard(combined);
+  };
+  return el;
+}
+
+function sessionRowEl(s) {
+  const row = document.createElement("div");
+  row.className = "session-row";
+  const timeRange = `${formatTimeOfDay(s.startTime)}–${formatTimeOfDay(s.endTime)}`;
+  row.innerHTML = `
+    <div class="session-time">
+      ${timeRange}
+      <span class="session-duration">(${formatDuration(s.durationSeconds || 0)})</span>
+    </div>
+    <div class="session-notes ${s.notes ? "" : "empty"}" data-notes-toggle>${s.notes ? escapeHTML(s.notes) : "(no notes)"}</div>
+    <div class="session-actions">
+      <button class="btn btn-ghost btn-sm btn-icon" title="Copy notes" data-copy-session>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      </button>
+      <button class="btn btn-ghost btn-sm btn-icon" title="Edit entry" data-edit>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
+      <button class="btn btn-ghost btn-sm btn-icon" title="Delete entry" data-delete style="color: var(--danger);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
+      </button>
+    </div>
+  `;
+  row.querySelector("[data-copy-session]").onclick = () => {
+    if (!s.notes || !s.notes.trim()) { toast({title: "No notes to copy", className: "warning"}); return; }
+    copyToClipboard(s.notes);
+  };
+  row.querySelector("[data-edit]").onclick = () => openEditEntry(s.id);
+  row.querySelector("[data-delete]").onclick = () => deleteEntry(s.id);
+  row.querySelector("[data-notes-toggle]").addEventListener("click", (e) => {
+    if (document.documentElement.dataset.compact === "on") e.currentTarget.classList.toggle("expanded");
+  });
+  return row;
+}
+
+function renderClientDatalist() {
+  const dl = document.getElementById("client-suggestions");
+  dl.innerHTML = state.autocompleteClients.map(c => `<option value="${escapeHTML(c)}">`).join("");
+}
+
+function renderStopAllButton() {
+  const btn = document.getElementById("stop-all-btn");
+  const runningCount = state.activeTimers.filter(t => t.state === "running" || t.state === "paused").length;
+  if (runningCount >= 2) btn.classList.remove("hidden");
+  else btn.classList.add("hidden");
+  btn.onclick = () => stopAllTimers();
+}
+
+// =====================================================================
+// Ticking — updates clock displays without full re-render
+// =====================================================================
+setInterval(() => {
+  for (const t of state.activeTimers) {
+    if (t.state !== "running") continue;
+    const card = document.querySelector(`.timer-card[data-timer-id="${t.id}"]`);
+    if (!card) continue;
+    const clock = card.querySelector("[data-clock]");
+    if (clock) clock.textContent = formatClock(calculateElapsed(t));
+  }
+}, TICK_MS);
+
+// Heartbeat + idle check
+setInterval(() => {
+  const now = nowISO();
+  let dirty = false;
+  for (const t of state.activeTimers) {
+    if (t.state === "running") {
+      t.lastHeartbeat = now;
+      dirty = true;
+      // Idle warning check
+      if (!state.idleAcknowledged[t.id]) {
+        const elapsed = calculateElapsed(t);
+        if (elapsed >= state.settings.idleThresholdMinutes * 60) {
+          openIdleToast(t);
+          state.idleAcknowledged[t.id] = "warned"; // prevent repeat toasts until acknowledged
+        }
+      }
+    }
+  }
+  if (dirty) saveActiveTimers();
+  // Every heartbeat also refresh totals in case an entry just ticked over a boundary
+  renderTotals();
+}, HEARTBEAT_MS);
+
+// =====================================================================
+// Idle warning
+// =====================================================================
+function openIdleToast(t) {
+  const label = `${t.clientName || "(no client)"} · ${t.ticketNumber || "(no ticket)"}`;
+  const id = "idle-" + t.id;
+  toast({
+    id,
+    className: "warning",
+    title: `Timer running for ${state.settings.idleThresholdMinutes} min`,
+    body: label,
+    actions: [
+      {label: "Continue", onClick: () => { state.idleAcknowledged[t.id] = "acknowledged"; render(); }},
+      {label: "Pause", onClick: () => { pauseTimer(t.id); state.idleAcknowledged[t.id] = "acknowledged"; }},
+      {label: "Discard", onClick: () => { removeTimerNoConfirm(t.id); }, danger: true},
+    ],
+    persistent: true,
+  });
+}
+
+function removeTimerNoConfirm(id) {
+  state.activeTimers = state.activeTimers.filter(x => x.id !== id);
+  delete state.idleAcknowledged[id];
+  saveActiveTimers();
+  render();
+}
+
+// =====================================================================
+// Crash recovery
+// =====================================================================
+function checkCrashRecovery() {
+  const now = nowMs();
+  const stale = state.activeTimers.filter(t => t.state === "running" && (now - new Date(t.lastHeartbeat).getTime() > CRASH_RECOVERY_THRESHOLD_MS));
+  if (stale.length === 0) return;
+  openRecoveryModal(stale[0], stale);
+}
+
+function openRecoveryModal(t, allStale) {
+  const lastHb = new Date(t.lastHeartbeat);
+  const gapMs = nowMs() - lastHb.getTime();
+  const gapMin = Math.floor(gapMs / 60000);
+  const gapH = Math.floor(gapMin / 60);
+  const gapText = gapH > 0 ? `${gapH}h ${gapMin % 60}m` : `${gapMin}m`;
+  const segmentToHeartbeat = t.currentSegmentStart
+    ? Math.max(0, (new Date(t.lastHeartbeat).getTime() - new Date(t.currentSegmentStart).getTime()) / 1000)
+    : 0;
+  const elapsedAtCrash = (t.accumulatedSeconds || 0) + segmentToHeartbeat;
+  const modal = openModal({
+    title: "Timer recovery",
+    body: `
+      <p style="margin-top:0;">Timer for <strong>${escapeHTML(t.clientName || "(no client)")}</strong> / <strong>${escapeHTML(t.ticketNumber || "(no ticket)")}</strong> was still running.</p>
+      <p style="color: var(--text-muted);">Last active <strong>${gapText} ago</strong> at ${lastHb.toLocaleString([], {month: "short", day: "numeric", hour: "numeric", minute: "2-digit"})}.<br>Elapsed at last active: <strong>${formatDuration(elapsedAtCrash)}</strong></p>
+      ${allStale.length > 1 ? `<p style="color: var(--text-muted); font-size: 12px;">${allStale.length - 1} more timer(s) also need recovery.</p>` : ""}
+    `,
+    footer: `
+      <button class="btn btn-secondary" data-action="discard">Discard session</button>
+      <button class="btn btn-secondary" data-action="cap">Cap at last active</button>
+      <button class="btn btn-primary" data-action="continue">Continue from now</button>
+    `,
+    onAction: (action) => {
+      if (action === "discard") {
+        state.activeTimers = state.activeTimers.filter(x => x.id !== t.id);
+        saveActiveTimers();
+      } else if (action === "cap") {
+        t.accumulatedSeconds = elapsedAtCrash;
+        t.currentSegmentStart = null;
+        t.state = "paused";
+        stopTimer(t.id, {skipValidation: !t.clientName.trim() || !t.ticketNumber.trim() ? false : true});
+        // If required fields missing, stopTimer opens the incomplete modal; otherwise entry is saved
+      } else if (action === "continue") {
+        // Pretend it's still running from now, adding the recovered elapsed time to accumulated
+        t.accumulatedSeconds = elapsedAtCrash;
+        t.currentSegmentStart = nowISO();
+        t.lastHeartbeat = nowISO();
+        t.state = "running";
+        saveActiveTimers();
+      }
+      closeModal(modal);
+      // If more stale timers, chain the next one
+      const remaining = state.activeTimers.filter(x => x.state === "running" && (nowMs() - new Date(x.lastHeartbeat).getTime() > CRASH_RECOVERY_THRESHOLD_MS));
+      if (remaining.length > 0) openRecoveryModal(remaining[0], remaining);
+      else render();
+    },
+  });
+}
+
+// =====================================================================
+// Incomplete-stop modal
+// =====================================================================
+function openIncompleteStopModal(t) {
+  const modal = openModal({
+    title: "Missing required fields",
+    body: `
+      <p style="margin-top:0;">This entry needs a <strong>Client Name</strong> and <strong>Ticket #</strong> before it can be saved.</p>
+      <p style="color: var(--text-muted);">Fill them in, or discard the session (${formatDuration(t.accumulatedSeconds)}).</p>
+    `,
+    footer: `
+      <button class="btn btn-danger" data-action="discard">Discard session</button>
+      <button class="btn btn-primary" data-action="back">Go back</button>
+    `,
+    onAction: (action) => {
+      if (action === "discard") {
+        state.activeTimers = state.activeTimers.filter(x => x.id !== t.id);
+        saveActiveTimers();
+        render();
+      } else {
+        // Restore paused state so tech can fix and try again
+        t.state = "paused";
+        saveActiveTimers();
+        render();
+      }
+      closeModal(modal);
+    },
+  });
+}
+
+function openStopAllIncompleteModal(running, incomplete) {
+  const list = incomplete.map(t => `<li>${escapeHTML(t.clientName || "(no client)")} · ${escapeHTML(t.ticketNumber || "(no ticket)")} · ${formatDuration(calculateElapsed(t))}</li>`).join("");
+  const modal = openModal({
+    title: "Some timers are incomplete",
+    body: `
+      <p style="margin-top:0;">${incomplete.length} of ${running.length} timer(s) are missing Client or Ticket # and can't be saved as-is.</p>
+      <ul style="color: var(--text-muted); font-size: 13px;">${list}</ul>
+      <p>Stop the complete ones now and fix the rest, or cancel to fix everything first.</p>
+    `,
+    footer: `
+      <button class="btn btn-secondary" data-action="cancel">Cancel</button>
+      <button class="btn btn-primary" data-action="stopComplete">Stop complete timers only</button>
+    `,
+    onAction: (action) => {
+      closeModal(modal);
+      if (action === "stopComplete") {
+        running.filter(t => t.clientName.trim() && t.ticketNumber.trim()).forEach(t => stopTimer(t.id));
+      }
+    },
+  });
+}
+
+// =====================================================================
+// Edit entry modal
+// =====================================================================
+function openEditModal(entry) {
+  const modal = openModal({
+    title: "Edit entry",
+    body: `
+      <div class="form-row">
+        <label>Client</label>
+        <input type="text" list="client-suggestions" id="edit-client" value="${escapeHTML(entry.clientName)}">
+      </div>
+      <div class="form-row">
+        <label>Ticket #</label>
+        <input type="text" id="edit-ticket" value="${escapeHTML(entry.ticketNumber)}">
+      </div>
+      <div class="form-row">
+        <label>Status</label>
+        <select id="edit-status">
+          ${STATUS_OPTIONS.map(s => `<option value="${s}" ${entry.status === s ? "selected" : ""}>${s}</option>`).join("")}
+        </select>
+      </div>
+      <div class="form-grid">
+        <div class="form-row">
+          <label>Start</label>
+          <input type="datetime-local" id="edit-start" value="${toLocalDatetimeInput(entry.startTime)}">
+        </div>
+        <div class="form-row">
+          <label>End</label>
+          <input type="datetime-local" id="edit-end" value="${toLocalDatetimeInput(entry.endTime)}">
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Notes</label>
+        <textarea id="edit-notes" rows="4">${escapeHTML(entry.notes)}</textarea>
+      </div>
+    `,
+    footer: `
+      <button class="btn btn-secondary" data-action="cancel">Cancel</button>
+      <button class="btn btn-primary" data-action="save">Save</button>
+    `,
+    onAction: (action, root) => {
+      if (action === "save") {
+        const startVal = root.querySelector("#edit-start").value;
+        const endVal = root.querySelector("#edit-end").value;
+        const startDate = new Date(startVal);
+        const endDate = new Date(endVal);
+        if (!startVal || !endVal || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+          alert("Start and End must both be valid dates and times.");
+          return;
+        }
+        if (endDate < startDate) {
+          alert("End time must be after start time.");
+          return;
+        }
+        const updates = {
+          clientName: root.querySelector("#edit-client").value.trim(),
+          ticketNumber: root.querySelector("#edit-ticket").value.trim(),
+          status: root.querySelector("#edit-status").value,
+          startTime: startDate.toISOString(),
+          endTime: endDate.toISOString(),
+          notes: root.querySelector("#edit-notes").value,
+        };
+        if (!updates.clientName || !updates.ticketNumber) {
+          alert("Client Name and Ticket # are required.");
+          return;
+        }
+        updateEntry(entry.id, updates);
+      }
+      closeModal(modal);
+    },
+  });
+}
+
+function toLocalDatetimeInput(iso) {
+  const d = new Date(iso);
+  const pad = n => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+// =====================================================================
+// Settings modal
+// =====================================================================
+function openSettings() {
+  const s = state.settings;
+  const modal = openModal({
+    title: "Settings",
+    body: `
+      <div class="modal-section">
+        <h3>Appearance</h3>
+        <div class="settings-row"><label>Theme</label>
+          <select class="settings-control" id="set-theme">
+            <option value="system" ${s.theme==="system"?"selected":""}>System</option>
+            <option value="light" ${s.theme==="light"?"selected":""}>Light</option>
+            <option value="dark" ${s.theme==="dark"?"selected":""}>Dark</option>
+          </select>
+        </div>
+        <div class="settings-row"><label>Compact mode</label>
+          <select class="settings-control" id="set-compact">
+            <option value="auto" ${s.compactMode==="auto"?"selected":""}>Auto</option>
+            <option value="on" ${s.compactMode==="on"?"selected":""}>On</option>
+            <option value="off" ${s.compactMode==="off"?"selected":""}>Off</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-section">
+        <h3>Timing</h3>
+        <div class="settings-row"><label>Idle warning (minutes)</label>
+          <input class="settings-control" type="number" min="1" max="480" id="set-idle" value="${s.idleThresholdMinutes}" style="width: 80px;">
+        </div>
+        <div class="settings-row"><label>Week starts on</label>
+          <select class="settings-control" id="set-weekstart">
+            <option value="0" ${s.weekStartDay===0?"selected":""}>Sunday</option>
+            <option value="1" ${s.weekStartDay===1?"selected":""}>Monday</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-section">
+        <h3>Autocomplete history</h3>
+        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 6px;">${state.autocompleteClients.length} client name(s) remembered</div>
+        <button class="btn btn-secondary btn-sm" data-action="viewClients">View / delete</button>
+      </div>
+      <div class="modal-section">
+        <h3>Data</h3>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          <button class="btn btn-secondary btn-sm" data-action="exportCSV">Export CSV</button>
+          <button class="btn btn-secondary btn-sm" data-action="exportJSON">Export JSON</button>
+          <button class="btn btn-secondary btn-sm" data-action="exportEncrypted">Export encrypted</button>
+          <button class="btn btn-secondary btn-sm" data-action="importData">Import…</button>
+        </div>
+        <div style="margin-top: 8px;">
+          <button class="btn btn-danger btn-sm" data-action="clearAll">Clear all data</button>
+        </div>
+      </div>
+      <div class="modal-section" style="font-size: 11px; color: var(--text-muted); text-align: center; padding-top: 8px; border-top: 1px solid var(--border);">
+        Time /T v${APP_VERSION} · <a href="https://github.com/bcruz22/time-tracker" target="_blank" rel="noopener">github.com/bcruz22/time-tracker</a>
+      </div>
+    `,
+    footer: `<button class="btn btn-primary" data-action="save">Done</button>`,
+    onAction: (action, root) => {
+      if (action === "save") {
+        state.settings.theme = root.querySelector("#set-theme").value;
+        state.settings.compactMode = root.querySelector("#set-compact").value;
+        state.settings.idleThresholdMinutes = Math.max(1, parseInt(root.querySelector("#set-idle").value) || 60);
+        state.settings.weekStartDay = parseInt(root.querySelector("#set-weekstart").value);
+        saveSettings();
+        applyTheme(); applyCompactMode();
+        render();
+        closeModal(modal);
+      } else if (action === "exportCSV") {
+        exportCSV();
+      } else if (action === "exportJSON") {
+        exportJSON();
+      } else if (action === "exportEncrypted") {
+        openEncryptedExportModal();
+      } else if (action === "importData") {
+        triggerImport();
+      } else if (action === "clearAll") {
+        confirmClearAll(() => { closeModal(modal); });
+      } else if (action === "viewClients") {
+        openClientListModal();
+      }
+    },
+  });
+}
+
+function openClientListModal() {
+  const list = state.autocompleteClients.length === 0
+    ? `<p style="color: var(--text-muted); font-size: 13px;">No client names remembered yet.</p>`
+    : `<ul style="list-style: none; padding: 0; margin: 0;">
+        ${state.autocompleteClients.map((c, i) => `
+          <li style="display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--border);">
+            <span style="flex: 1;">${escapeHTML(c)}</span>
+            <button class="btn btn-ghost btn-sm" data-remove="${i}" style="color: var(--danger);">Remove</button>
+          </li>
+        `).join("")}
+      </ul>`;
+  const modal = openModal({
+    title: "Client autocomplete history",
+    body: list,
+    footer: `<button class="btn btn-primary" data-action="close">Close</button>`,
+    onAction: (action) => { if (action === "close") closeModal(modal); },
+  });
+  modal.querySelectorAll("[data-remove]").forEach(btn => {
+    btn.onclick = () => {
+      const i = parseInt(btn.dataset.remove);
+      state.autocompleteClients.splice(i, 1);
+      saveAutocomplete();
+      closeModal(modal);
+      openClientListModal();
+    };
+  });
+}
+
+function confirmClearAll(onDone) {
+  const modal = openModal({
+    title: "Clear all data?",
+    body: `<p style="margin-top:0;">This will permanently delete <strong>all entries, active timers, and autocomplete history</strong> from this device.</p>
+      <p style="color: var(--danger);">This cannot be undone. Export a backup first if you want to keep the data.</p>`,
+    footer: `
+      <button class="btn btn-secondary" data-action="cancel">Cancel</button>
+      <button class="btn btn-danger" data-action="confirm1">Yes, clear it</button>
+    `,
+    onAction: (action) => {
+      closeModal(modal);
+      if (action === "confirm1") confirmClearAllStage2(onDone);
+      else if (onDone) onDone();
+    },
+  });
+}
+
+function confirmClearAllStage2(onDone) {
+  const modal = openModal({
+    title: "Are you absolutely sure?",
+    body: `<p style="margin-top:0;">Last chance. Type <strong>DELETE</strong> to confirm.</p>
+      <input type="text" id="confirm-input" placeholder="DELETE" style="width: 100%;">`,
+    footer: `
+      <button class="btn btn-secondary" data-action="cancel">Cancel</button>
+      <button class="btn btn-danger" data-action="confirm2">Clear all data</button>
+    `,
+    onAction: (action, root) => {
+      if (action === "confirm2") {
+        if (root.querySelector("#confirm-input").value !== "DELETE") {
+          alert("Type DELETE exactly to confirm.");
+          return;
+        }
+        localStorage.removeItem(K.entries);
+        localStorage.removeItem(K.activeTimers);
+        localStorage.removeItem(K.autocomplete);
+        state.entries = [];
+        state.activeTimers = [];
+        state.autocompleteClients = [];
+        state.expandedTickets.clear();
+        state.idleAcknowledged = {};
+        render();
+        toast({title: "All data cleared", className: "success"});
+      }
+      closeModal(modal);
+      if (onDone) onDone();
+    },
+  });
+}
+
+// =====================================================================
+// Encrypted export modal
+// =====================================================================
+function openEncryptedExportModal() {
+  const modal = openModal({
+    title: "Export encrypted backup",
+    body: `
+      <p style="margin-top:0; font-size: 13px;">Set a password to encrypt this backup. Uses AES-GCM with PBKDF2 (${PBKDF2_ITERATIONS.toLocaleString()} iterations, SHA-256).</p>
+      <div class="form-row">
+        <label>Password</label>
+        <input type="password" id="enc-password" autocomplete="new-password" placeholder="Enter a strong password">
+      </div>
+      <div class="form-row">
+        <label>Confirm password</label>
+        <input type="password" id="enc-password-confirm" autocomplete="new-password" placeholder="Re-enter password">
+      </div>
+      <div class="password-strength">
+        <div class="password-strength-bar"><div class="password-strength-fill" id="pw-fill"></div></div>
+        <div class="password-requirements">
+          Password requirements:
+          <ul id="pw-reqs">
+            <li data-req="length">At least 12 characters</li>
+            <li data-req="upper">One uppercase letter</li>
+            <li data-req="lower">One lowercase letter</li>
+            <li data-req="digit">One number</li>
+            <li data-req="special">One special character</li>
+          </ul>
+        </div>
+      </div>
+      <p style="color: var(--danger); font-size: 12px; margin-top: 12px;"><strong>Warning:</strong> If you lose this password, the backup cannot be recovered. There is no reset.</p>
+    `,
+    footer: `
+      <button class="btn btn-secondary" data-action="cancel">Cancel</button>
+      <button class="btn btn-primary" data-action="export" id="enc-export-btn" disabled>Export</button>
+    `,
+    onAction: async (action, root) => {
+      if (action === "export") {
+        const pw = root.querySelector("#enc-password").value;
+        const pwc = root.querySelector("#enc-password-confirm").value;
+        if (pw !== pwc) { alert("Passwords don't match."); return; }
+        try {
+          await exportEncryptedJSON(pw);
+          closeModal(modal);
+        } catch (e) {
+          alert("Encryption failed: " + e.message);
+        }
+      } else {
+        closeModal(modal);
+      }
+    },
+  });
+  const pwInput = modal.querySelector("#enc-password");
+  const pwcInput = modal.querySelector("#enc-password-confirm");
+  const exportBtn = modal.querySelector("#enc-export-btn");
+  const evaluate = () => {
+    const pw = pwInput.value;
+    const reqs = evaluatePassword(pw);
+    const met = Object.values(reqs).filter(Boolean).length;
+    ["length","upper","lower","digit","special"].forEach(k => {
+      const li = modal.querySelector(`[data-req="${k}"]`);
+      if (li) li.classList.toggle("met", reqs[k]);
+    });
+    const fill = modal.querySelector("#pw-fill");
+    fill.className = "password-strength-fill " + (met <= 1 ? "weak" : met <= 2 ? "fair" : met <= 3 ? "good" : "strong");
+    const allMet = Object.values(reqs).every(Boolean);
+    exportBtn.disabled = !(allMet && pw === pwcInput.value && pw.length > 0);
+  };
+  pwInput.addEventListener("input", evaluate);
+  pwcInput.addEventListener("input", evaluate);
+}
+
+function evaluatePassword(pw) {
+  return {
+    length: pw.length >= 12,
+    upper: /[A-Z]/.test(pw),
+    lower: /[a-z]/.test(pw),
+    digit: /[0-9]/.test(pw),
+    special: /[^A-Za-z0-9]/.test(pw),
+  };
+}
+
+// =====================================================================
+// Import
+// =====================================================================
+function triggerImport() {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".json,.csv,application/json,text/csv";
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) return;
+    const text = await file.text();
+    if (file.name.toLowerCase().endsWith(".csv")) {
+      importCSV(text);
+    } else {
+      // Try JSON
+      try {
+        const parsed = JSON.parse(text);
+        if (parsed.encrypted) {
+          const pw = prompt("Enter password to decrypt this backup:");
+          if (!pw) return;
+          try {
+            const decrypted = await decrypt(parsed, pw);
+            importJSON(JSON.parse(decrypted));
+          } catch (e) {
+            alert("Decryption failed. Wrong password?");
+          }
+        } else {
+          importJSON(parsed);
+        }
+      } catch (e) {
+        alert("Could not parse file: " + e.message);
+      }
+    }
+  };
+  input.click();
+}
+
+function importJSON(data) {
+  if (!data || !Array.isArray(data.entries)) {
+    alert("Invalid backup file: missing entries.");
+    return;
+  }
+  let added = 0, updated = 0;
+  for (const e of data.entries) {
+    if (!e.id) e.id = uuid();
+    const existing = state.entries.find(x => x.id === e.id);
+    if (existing) {
+      if (new Date(e.updatedAt || 0) > new Date(existing.updatedAt || 0)) {
+        Object.assign(existing, e);
+        updated++;
+      }
+    } else {
+      state.entries.push(e);
+      added++;
+    }
+  }
+  if (data.settings) state.settings = {...DEFAULT_SETTINGS, ...data.settings};
+  if (data.autocompleteClients) {
+    for (const c of data.autocompleteClients) {
+      if (!state.autocompleteClients.includes(c)) state.autocompleteClients.push(c);
+    }
+  }
+  saveAll();
+  applyTheme(); applyCompactMode();
+  render();
+  toast({title: "Import complete", body: `${added} added, ${updated} updated`, className: "success"});
+}
+
+function importCSV(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim() !== "");
+  if (lines.length < 2) { alert("CSV appears empty."); return; }
+  const headers = parseCSVLine(lines[0]).map(h => h.trim());
+  const idx = {
+    ticket: headers.indexOf("Ticket #"),
+    client: headers.indexOf("Client Name"),
+    status: headers.indexOf("Status"),
+    start: headers.indexOf("Start Time"),
+    end: headers.indexOf("End Time"),
+    duration: headers.indexOf("Duration (seconds)"),
+    notes: headers.indexOf("Notes"),
+  };
+  if (idx.start === -1 || idx.end === -1) {
+    alert('This CSV is missing the expected "Start Time" / "End Time" columns, so it can\'t be imported. Use a CSV exported from Time /T.');
+    return;
+  }
+  let added = 0, skipped = 0;
+  for (let i = 1; i < lines.length; i++) {
+    try {
+      const cols = parseCSVLine(lines[i]);
+      if (cols.length < 3) { skipped++; continue; }
+      const startDate = new Date(cols[idx.start]);
+      const endDate = new Date(cols[idx.end]);
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) { skipped++; continue; }
+      const parsedDuration = idx.duration >= 0 ? parseInt(cols[idx.duration], 10) : NaN;
+      const entry = {
+        id: uuid(),
+        ticketNumber: (idx.ticket >= 0 ? cols[idx.ticket] : "") || "",
+        clientName: (idx.client >= 0 ? cols[idx.client] : "") || "",
+        status: (idx.status >= 0 ? cols[idx.status] : "") || "Open",
+        startTime: startDate.toISOString(),
+        endTime: endDate.toISOString(),
+        durationSeconds: !isNaN(parsedDuration) ? parsedDuration : Math.max(0, Math.floor((endDate - startDate) / 1000)),
+        notes: (idx.notes >= 0 ? cols[idx.notes] : "") || "",
+        createdAt: nowISO(),
+        updatedAt: nowISO(),
+      };
+      state.entries.push(entry);
+      added++;
+      if (entry.clientName && !state.autocompleteClients.includes(entry.clientName)) {
+        state.autocompleteClients.push(entry.clientName);
+      }
+    } catch (e) {
+      console.warn("Skipped CSV row", i, e);
+      skipped++;
+    }
+  }
+  saveEntries(); saveAutocomplete();
+  render();
+  toast({
+    title: "CSV import complete",
+    body: `${added} entries added${skipped ? `, ${skipped} row(s) skipped (missing or invalid data)` : ""}`,
+    className: skipped ? "warning" : "success",
+    timeout: skipped ? 6000 : 3500,
+  });
+}
+
+function parseCSVLine(line) {
+  const out = [];
+  let cur = "", inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (inQ) {
+      if (c === '"' && line[i+1] === '"') { cur += '"'; i++; }
+      else if (c === '"') inQ = false;
+      else cur += c;
+    } else {
+      if (c === '"') inQ = true;
+      else if (c === ",") { out.push(cur); cur = ""; }
+      else cur += c;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+
+// =====================================================================
+// Export
+// =====================================================================
+function exportCSV() {
+  const headers = ["Ticket #", "Client Name", "Status", "Start Time", "End Time", "Duration (seconds)", "Duration (formatted)", "Notes"];
+  const rows = state.entries.map(e => [
+    e.ticketNumber, e.clientName, e.status,
+    new Date(e.startTime).toISOString(),
+    new Date(e.endTime).toISOString(),
+    e.durationSeconds || 0,
+    formatDuration(e.durationSeconds || 0),
+    e.notes,
+  ]);
+  const csv = [headers, ...rows].map(row => row.map(csvEscape).join(",")).join("\n");
+  downloadFile(csv, `time-tracker-${ymd(new Date())}.csv`, "text/csv");
+}
+
+function csvEscape(v) {
+  if (v == null) return "";
+  const s = String(v);
+  if (/[",\n\r]/.test(s)) return `"${s.replace(/"/g, '""')}"`;
+  return s;
+}
+
+function exportJSON() {
+  const data = {
+    version: APP_VERSION,
+    exportedAt: nowISO(),
+    entries: state.entries,
+    settings: state.settings,
+    autocompleteClients: state.autocompleteClients,
+  };
+  downloadFile(JSON.stringify(data, null, 2), `time-tracker-${ymd(new Date())}.json`, "application/json");
+}
+
+async function exportEncryptedJSON(password) {
+  const data = {
+    version: APP_VERSION,
+    exportedAt: nowISO(),
+    entries: state.entries,
+    settings: state.settings,
+    autocompleteClients: state.autocompleteClients,
+  };
+  const encrypted = await encrypt(JSON.stringify(data), password);
+  downloadFile(JSON.stringify(encrypted, null, 2), `time-tracker-${ymd(new Date())}.enc.json`, "application/json");
+  toast({title: "Encrypted backup exported", className: "success"});
+}
+
+function downloadFile(content, filename, mimeType) {
+  const blob = new Blob([content], {type: mimeType});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// =====================================================================
+// Encryption (AES-GCM + PBKDF2)
+// =====================================================================
+async function encrypt(plaintext, password) {
+  const enc = new TextEncoder();
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey(
+    {name: "PBKDF2", salt, iterations: PBKDF2_ITERATIONS, hash: "SHA-256"},
+    keyMaterial,
+    {name: "AES-GCM", length: 256},
+    false,
+    ["encrypt"]
+  );
+  const ciphertext = await crypto.subtle.encrypt({name: "AES-GCM", iv}, key, enc.encode(plaintext));
+  return {
+    encrypted: true,
+    algorithm: "AES-GCM",
+    kdf: "PBKDF2",
+    kdfHash: "SHA-256",
+    iterations: PBKDF2_ITERATIONS,
+    salt: bufToB64(salt),
+    iv: bufToB64(iv),
+    data: bufToB64(new Uint8Array(ciphertext)),
+    version: APP_VERSION,
+  };
+}
+
+async function decrypt(payload, password) {
+  const enc = new TextEncoder();
+  const salt = b64ToBuf(payload.salt);
+  const iv = b64ToBuf(payload.iv);
+  const data = b64ToBuf(payload.data);
+  const keyMaterial = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey(
+    {name: "PBKDF2", salt, iterations: payload.iterations || PBKDF2_ITERATIONS, hash: payload.kdfHash || "SHA-256"},
+    keyMaterial,
+    {name: "AES-GCM", length: 256},
+    false,
+    ["decrypt"]
+  );
+  const decrypted = await crypto.subtle.decrypt({name: "AES-GCM", iv}, key, data);
+  return new TextDecoder().decode(decrypted);
+}
+
+function bufToB64(buf) {
+  const bytes = new Uint8Array(buf);
+  let bin = "";
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin);
+}
+
+function b64ToBuf(b64) {
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes.buffer;
+}
+
+// =====================================================================
+// Copy to clipboard
+// =====================================================================
+async function copyToClipboard(text) {
+  try {
+    await navigator.clipboard.writeText(text);
+    toast({title: "Copied to clipboard", className: "success"});
+  } catch (e) {
+    // Fallback
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand("copy"); toast({title: "Copied", className: "success"}); }
+    catch { toast({title: "Copy failed", className: "error"}); }
+    document.body.removeChild(ta);
+  }
+}
+
+// =====================================================================
+// Modals
+// =====================================================================
+function openModal({title, body, footer, onAction}) {
+  const root = document.createElement("div");
+  root.className = "modal-backdrop";
+  root.innerHTML = `
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <h2 class="modal-title">${title}</h2>
+        <button class="icon-btn modal-close" data-action="cancel" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="12" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">${body}</div>
+      ${footer ? `<div class="modal-footer">${footer}</div>` : ""}
+    </div>
+  `;
+  document.getElementById("modal-root").appendChild(root);
+  root.addEventListener("click", (e) => {
+    if (e.target === root) onAction && onAction("cancel", root.querySelector(".modal"));
+  });
+  root.querySelectorAll("[data-action]").forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      onAction && onAction(btn.dataset.action, root.querySelector(".modal"));
+    };
+  });
+  const esc = (e) => { if (e.key === "Escape") { onAction && onAction("cancel", root.querySelector(".modal")); document.removeEventListener("keydown", esc); } };
+  document.addEventListener("keydown", esc);
+  return root;
+}
+
+function closeModal(modal) {
+  if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
+}
+
+// =====================================================================
+// Toast
+// =====================================================================
+function toast({id, title, body, className, actions, persistent, timeout}) {
+  const container = document.getElementById("toast-container");
+  if (id) {
+    const existing = container.querySelector(`[data-toast-id="${id}"]`);
+    if (existing) existing.remove();
+  }
+  const el = document.createElement("div");
+  el.className = "toast" + (className ? ` ${className}` : "");
+  if (id) el.dataset.toastId = id;
+  el.innerHTML = `
+    ${title ? `<div class="toast-title">${escapeHTML(title)}</div>` : ""}
+    ${body ? `<div class="toast-body">${escapeHTML(body)}</div>` : ""}
+    ${actions ? `<div class="toast-actions">${actions.map((a, i) => `<button class="btn btn-sm ${a.danger ? "btn-danger" : "btn-secondary"}" data-i="${i}">${escapeHTML(a.label)}</button>`).join("")}</div>` : ""}
+  `;
+  container.appendChild(el);
+  if (actions) {
+    el.querySelectorAll("[data-i]").forEach(btn => {
+      btn.onclick = () => { actions[parseInt(btn.dataset.i)].onClick(); el.remove(); };
+    });
+  }
+  if (!persistent) {
+    setTimeout(() => el.remove(), timeout || 3500);
+  }
+  return el;
+}
+
+// =====================================================================
+// Theme + compact mode
+// =====================================================================
+function applyTheme() {
+  const t = state.settings.theme;
+  if (t === "system") {
+    const isDark = matchMedia("(prefers-color-scheme: dark)").matches;
+    document.documentElement.dataset.theme = isDark ? "dark" : "light";
+  } else {
+    document.documentElement.dataset.theme = t;
+  }
+  document.querySelector('meta[name="theme-color"]').setAttribute("content", document.documentElement.dataset.theme === "dark" ? "#0f1114" : "#f7f8fa");
+}
+
+function applyCompactMode() {
+  const m = state.settings.compactMode;
+  if (m === "auto") {
+    document.documentElement.dataset.compact = window.innerWidth < 640 ? "on" : "off";
+  } else {
+    document.documentElement.dataset.compact = m;
+  }
+}
+
+// Theme toggle click (header icon only flips light/dark — "system" is a deliberate choice made in Settings, not part of this rotation)
+function cycleTheme() {
+  state.settings.theme = state.settings.theme === "light" ? "dark" : "light";
+  saveSettings();
+  applyTheme();
+  toast({title: `Theme: ${state.settings.theme}`, timeout: 1500});
+}
+
+function cycleCompact() {
+  state.settings.compactMode = state.settings.compactMode === "on" ? "off" : "on";
+  saveSettings();
+  applyCompactMode();
+  toast({title: `Compact: ${state.settings.compactMode}`, timeout: 1500});
+}
+
+// =====================================================================
+// Service worker registration + update banner
+// =====================================================================
+function registerSW() {
+  if (!("serviceWorker" in navigator)) return;
+  navigator.serviceWorker.register("sw.js").then(reg => {
+    reg.addEventListener("updatefound", () => {
+      const nw = reg.installing;
+      if (!nw) return;
+      nw.addEventListener("statechange", () => {
+        if (nw.state === "installed" && navigator.serviceWorker.controller) {
+          document.getElementById("update-banner").classList.remove("hidden");
+        }
+      });
+    });
+  }).catch(e => console.warn("SW registration failed:", e));
+}
+
+// =====================================================================
+// Init
+// =====================================================================
+function init() {
+  loadState();
+  applyTheme();
+  applyCompactMode();
+
+  // Header controls
+  document.getElementById("theme-toggle").onclick = cycleTheme;
+  document.getElementById("compact-toggle").onclick = cycleCompact;
+  document.getElementById("settings-btn").onclick = openSettings;
+  document.getElementById("reload-btn").onclick = () => location.reload();
+
+  // System theme change listener
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    if (state.settings.theme === "system") applyTheme();
+  });
+  window.addEventListener("resize", () => {
+    if (state.settings.compactMode === "auto") applyCompactMode();
+  });
+
+  // First-time: ensure at least one timer card
+  if (state.activeTimers.length === 0) addTimer();
+  else render();
+
+  // Crash recovery check
+  setTimeout(checkCrashRecovery, 500);
+
+  // Save on page hide (extra insurance)
+  window.addEventListener("visibilitychange", () => {
+    if (document.hidden) saveAll();
+  });
+
+  registerSW();
+}
+
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
