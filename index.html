@@ -43,13 +43,6 @@
     --success-soft: rgba(165, 165, 8, 0.22);
     --toast-bg: #123C63;
     --scheme: dark;
-    --cat-streaming: #00B2A9;
-    --cat-software: #702082;
-    --cat-utilities: #D86018;
-    --cat-insurance: #2F65A7;
-    --cat-fitness: #E01F7C;
-    --cat-subscriptions: #A5A508;
-    --cat-other: #989C97;
     --shadow: 0 1px 2px rgba(0,0,0,.20), 0 1px 3px rgba(0,0,0,.35);
     --shadow-lg: 0 10px 25px rgba(0,0,0,.35), 0 4px 10px rgba(0,0,0,.25);
     --radius: 10px;
@@ -58,45 +51,29 @@
     --mono: "IBM Plex Mono", ui-monospace, "SF Mono", "Monaco", "Cascadia Code", "Roboto Mono", "Consolas", monospace;
     --sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
-  /* Light theme — applied when the user's system is light AND they haven't
-     manually forced dark, or when [data-theme="light"] is set. */
+  /* Light theme. Two identical blocks are required: one for system-auto (inside
+     prefers-color-scheme), one for explicit [data-theme="light"]. CSS has no way
+     to share a rule between a media query and an attribute selector without a
+     preprocessor. Keep them in sync manually when changing light mode values. */
   @media (prefers-color-scheme: light) {
     :root:not([data-theme="dark"]) {
-      --bg: #FFFFFF;
-      --surface: #F5F7FA;
-      --surface-2: #EBEFF5;
-      --border: #D3DCE8;
-      --border-strong: #BFC9D9;
-      --text: #00274C;
-      --text-muted: #5A6B85;
-      --text-faint: #667289;
-      --text-subtle: #667289;
-      --accent-soft: rgba(255, 203, 5, 0.24);
-      --danger-soft: rgba(154, 51, 36, 0.14);
-      --warning-soft: rgba(216, 96, 24, 0.16);
-      --success-soft: rgba(165, 165, 8, 0.20);
-      --toast-bg: #00274C;
-      --scheme: light;
+      --bg: #FFFFFF; --surface: #F5F7FA; --surface-2: #EBEFF5;
+      --border: #D3DCE8; --border-strong: #BFC9D9;
+      --text: #00274C; --text-muted: #5A6B85; --text-faint: #667289; --text-subtle: #667289;
+      --accent-soft: rgba(255,203,5,.24); --danger-soft: rgba(154,51,36,.14);
+      --warning-soft: rgba(216,96,24,.16); --success-soft: rgba(165,165,8,.20);
+      --toast-bg: #00274C; --scheme: light;
       --shadow: 0 1px 2px rgba(0,39,76,.06), 0 1px 3px rgba(0,39,76,.08);
       --shadow-lg: 0 10px 25px rgba(0,39,76,.10), 0 4px 10px rgba(0,39,76,.08);
     }
   }
   :root[data-theme="light"] {
-    --bg: #FFFFFF;
-    --surface: #F5F7FA;
-    --surface-2: #EBEFF5;
-    --border: #D3DCE8;
-    --border-strong: #BFC9D9;
-    --text: #00274C;
-    --text-muted: #5A6B85;
-    --text-faint: #667289;
-    --text-subtle: #667289;
-    --accent-soft: rgba(255, 203, 5, 0.24);
-    --danger-soft: rgba(154, 51, 36, 0.14);
-    --warning-soft: rgba(216, 96, 24, 0.16);
-    --success-soft: rgba(165, 165, 8, 0.20);
-    --toast-bg: #00274C;
-    --scheme: light;
+    --bg: #FFFFFF; --surface: #F5F7FA; --surface-2: #EBEFF5;
+    --border: #D3DCE8; --border-strong: #BFC9D9;
+    --text: #00274C; --text-muted: #5A6B85; --text-faint: #667289; --text-subtle: #667289;
+    --accent-soft: rgba(255,203,5,.24); --danger-soft: rgba(154,51,36,.14);
+    --warning-soft: rgba(216,96,24,.16); --success-soft: rgba(165,165,8,.20);
+    --toast-bg: #00274C; --scheme: light;
     --shadow: 0 1px 2px rgba(0,39,76,.06), 0 1px 3px rgba(0,39,76,.08);
     --shadow-lg: 0 10px 25px rgba(0,39,76,.10), 0 4px 10px rgba(0,39,76,.08);
   }
@@ -115,24 +92,20 @@
   #app { max-width: 1100px; margin: 0 auto; padding: 16px; }
 
   /* Header */
-  .app-header { display: flex; align-items: center; gap: 16px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
-  .brand { font-family: var(--mono); font-size: 22px; font-weight: 600; letter-spacing: -0.02em; display: flex; align-items: baseline; gap: 2px; }
+  .app-header { display: flex; align-items: center; gap: 10px; padding-bottom: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .brand { font-family: var(--mono); font-size: 22px; font-weight: 600; letter-spacing: -0.02em; display: flex; align-items: baseline; gap: 2px; flex-shrink: 0; }
   .brand-slash { color: var(--accent); }
   .brand-t { color: var(--accent); }
   .brand-tagline { font-size: 11px; font-family: var(--sans); font-weight: 400; color: var(--text-muted); letter-spacing: 0.02em; margin-left: 10px; white-space: nowrap; }
-  .totals { display: flex; gap: 16px; flex: 1; flex-wrap: wrap; }
-  .total-pill { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px; display: flex; flex-direction: column; gap: 2px; box-shadow: var(--shadow); }
+  .header-middle { flex: 1; min-width: 0; }
+  .totals { display: flex; gap: 10px; flex-wrap: nowrap; }
+  .total-pill { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 12px; display: flex; align-items: baseline; gap: 8px; box-shadow: var(--shadow); white-space: nowrap; }
   .total-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; }
-  .total-value { font-family: var(--mono); font-size: 16px; font-weight: 600; color: var(--text); }
-  .header-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .total-value { font-family: var(--mono); font-size: 15px; font-weight: 600; color: var(--text); }
+  .header-controls { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
   .icon-btn { width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); color: var(--text-muted); transition: background .12s, color .12s; }
   .icon-btn:hover { background: var(--surface-2); color: var(--text); }
   .icon-btn svg { width: 18px; height: 18px; }
-  .seg-toggle { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 3px; flex-shrink: 0; }
-  .seg-toggle button { background: none; border: none; color: var(--text-faint); font-size: 11px; font-weight: 600; font-family: inherit; padding: 5px 10px; border-radius: 999px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.06em; transition: background .12s, color .12s; }
-  .seg-toggle button:hover { color: var(--text); }
-  .seg-toggle button.active { background: var(--accent); color: var(--accent-text); }
-  .seg-toggle button.active:hover { color: var(--accent-text); }
 
   /* Sections */
   section { margin-bottom: 24px; }
@@ -207,7 +180,7 @@
   .ticket-status-select:focus { box-shadow: 0 0 0 2px var(--accent-soft); }
   .ticket-status-select.open { background: var(--success-soft); color: var(--success); }
   .ticket-status-select.waiting-customer { background: var(--warning-soft); color: var(--warning); }
-  .ticket-status-select.waiting-internal { background: rgba(0, 178, 169, 0.20); color: var(--cat-streaming); }
+  .ticket-status-select.waiting-internal { background: rgba(0, 178, 169, 0.20); color: #00B2A9; }
   .ticket-status-select.closed { background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border); padding: 2px 21px 2px 9px; }
   .select-caret { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); pointer-events: none; opacity: 0.7; }
   .ticket-total { font-family: var(--mono); font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; flex-shrink: 0; }
@@ -292,8 +265,8 @@
   html[data-compact="on"] .timer-card-clock-wrap { min-width: 90px; }
   html[data-compact="on"] .timer-notes { min-height: 28px; }
   html[data-compact="on"] .timer-card-fields { gap: 6px; }
-  html[data-compact="on"] .totals { gap: 8px; }
-  html[data-compact="on"] .total-pill { padding: 5px 8px; }
+  html[data-compact="on"] .totals { gap: 6px; }
+  html[data-compact="on"] .total-pill { padding: 4px 8px; }
   html[data-compact="on"] .total-value { font-size: 13px; }
   html[data-compact="on"] .total-label { font-size: 10px; }
   html[data-compact="on"] .session-row { padding: 5px 0; }
@@ -312,9 +285,10 @@
   /* Responsive */
   @media (max-width: 640px) {
     #app { padding: 12px; }
-    .app-header { gap: 10px; }
-    .totals { width: 100%; order: 3; }
+    .app-header { gap: 8px; }
+    .header-middle { width: 100%; order: 3; }
     .header-controls { margin-left: auto; }
+    .totals { flex-wrap: wrap; }
     .timer-cards { grid-template-columns: 1fr; }
     .timer-card-fields { grid-template-columns: 1fr; }
     .form-grid { grid-template-columns: 1fr; }
@@ -335,18 +309,10 @@
 <div id="app">
   <header class="app-header">
     <div class="brand">Time<span class="brand-slash">/</span><span class="brand-t">T</span><span class="brand-tagline">Track local. Save local.</span></div>
-    <div class="totals" id="totals"></div>
+    <div class="header-middle">
+      <div class="totals" id="totals"></div>
+    </div>
     <div class="header-controls">
-      <div class="seg-toggle" role="group" aria-label="Theme">
-        <button type="button" data-theme-choice="auto" title="Follow system">Auto</button>
-        <button type="button" data-theme-choice="light" title="Light">Light</button>
-        <button type="button" data-theme-choice="dark" title="Dark">Dark</button>
-      </div>
-      <div class="seg-toggle" role="group" aria-label="Density">
-        <button type="button" data-compact-choice="auto" title="Compact on small screens">Auto</button>
-        <button type="button" data-compact-choice="on" title="Always compact">Compact</button>
-        <button type="button" data-compact-choice="off" title="Always full">Full</button>
-      </div>
       <button class="icon-btn" id="settings-btn" title="Settings" aria-label="Settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       </button>
@@ -384,8 +350,7 @@
    Single-file app. All state in localStorage. No servers.
    ===================================================================== */
 
-const APP_VERSION = "0.1.0";
-const APP_NAME = "Time /T";
+const APP_VERSION = "0.2.0";
 const MAX_TIMERS = 10;
 const HEARTBEAT_MS = 10_000;
 const TICK_MS = 500;
@@ -398,7 +363,6 @@ const K = {
   settings: "timetrack.settings",
   autocomplete: "timetrack.autocomplete",
   ticketStatuses: "timetrack.ticketStatuses",
-  lastVersion: "timetrack.lastVersion",
 };
 
 const DEFAULT_SETTINGS = {
@@ -729,13 +693,16 @@ function clearTimer(id) {
   render();
 }
 
+const _fieldSaveTimers = {};
 function updateTimerField(id, field, value) {
   const t = state.activeTimers.find(x => x.id === id);
   if (!t) return;
   t[field] = value;
   t.lastHeartbeat = nowISO();
-  saveActiveTimers();
-  // No full re-render on typing; totals do not depend on active timer field values.
+  // Debounce: write to localStorage 500ms after the last keystroke, not on every character
+  const key = `${id}:${field}`;
+  clearTimeout(_fieldSaveTimers[key]);
+  _fieldSaveTimers[key] = setTimeout(() => { saveActiveTimers(); delete _fieldSaveTimers[key]; }, 500);
 }
 
 // =====================================================================
@@ -854,7 +821,7 @@ function getWeekStart(date) {
 // =====================================================================
 function render() {
   if (state.activeTimers.length === 0) {
-    state.activeTimers.unshift(createEmptyTimerObject());
+    state.activeTimers.push(createEmptyTimerObject());
     saveActiveTimers();
   }
   renderTotals();
@@ -868,8 +835,8 @@ function renderTotals() {
   const {today, week, month} = totalsForRanges();
   document.getElementById("totals").innerHTML = `
     <div class="total-pill"><span class="total-label">Today</span><span class="total-value">${formatDuration(today)}</span></div>
-    <div class="total-pill"><span class="total-label">This Week</span><span class="total-value">${formatDuration(week)}</span></div>
-    <div class="total-pill"><span class="total-label">This Month</span><span class="total-value">${formatDuration(month)}</span></div>
+    <div class="total-pill"><span class="total-label">Week</span><span class="total-value">${formatDuration(week)}</span></div>
+    <div class="total-pill"><span class="total-label">Month</span><span class="total-value">${formatDuration(month)}</span></div>
   `;
 }
 
@@ -929,10 +896,9 @@ function timerCardEl(t) {
     <div class="timer-card-actions">${actionsHTML}</div>
   `;
 
-  // Wire up inputs
+  // Wire up inputs — input fires on every keystroke, that's sufficient
   card.querySelectorAll("[data-field]").forEach(el => {
     el.addEventListener("input", () => updateTimerField(t.id, el.dataset.field, el.value));
-    el.addEventListener("change", () => updateTimerField(t.id, el.dataset.field, el.value));
   });
 
   // Wire up buttons
@@ -1161,8 +1127,8 @@ setInterval(() => {
     }
   }
   if (dirty) saveActiveTimers();
-  // Every heartbeat also refresh totals in case an entry just ticked over a boundary
-  renderTotals();
+  // Refresh totals only when timers are active (boundary crossings like midnight matter)
+  if (dirty) renderTotals();
 }, HEARTBEAT_MS);
 
 // =====================================================================
@@ -1180,6 +1146,7 @@ function openIdleToast(t) {
       {label: "Continue", onClick: () => { state.idleAcknowledged[t.id] = "acknowledged"; render(); }},
       {label: "Pause", onClick: () => { pauseTimer(t.id); state.idleAcknowledged[t.id] = "acknowledged"; }},
       {label: "Discard", onClick: () => { removeTimerNoConfirm(t.id); }, danger: true},
+      {label: "Dismiss", onClick: () => { state.idleAcknowledged[t.id] = "warned"; render(); }},
     ],
     persistent: true,
   });
@@ -1232,7 +1199,7 @@ function openRecoveryModal(t, allStale) {
         t.accumulatedSeconds = elapsedAtCrash;
         t.currentSegmentStart = null;
         t.state = "paused";
-        stopTimer(t.id, {skipValidation: !t.clientName.trim() || !t.ticketNumber.trim() ? false : true});
+        stopTimer(t.id, {skipValidation: !!(t.clientName.trim() && t.ticketNumber.trim())});
         // If required fields missing, stopTimer opens the incomplete modal; otherwise entry is saved
       } else if (action === "continue") {
         // Pretend it's still running from now, adding the recovered elapsed time to accumulated
@@ -1436,12 +1403,11 @@ function openSettings() {
     footer: `<button class="btn btn-primary" data-action="save">Done</button>`,
     onAction: (action, root) => {
       if (action === "save") {
-        state.settings.theme = root.querySelector("#set-theme").value;
-        state.settings.compactMode = root.querySelector("#set-compact").value;
+        setTheme(root.querySelector("#set-theme").value);
+        setCompactMode(root.querySelector("#set-compact").value);
         state.settings.idleThresholdMinutes = Math.max(1, parseInt(root.querySelector("#set-idle").value) || 60);
         state.settings.weekStartDay = parseInt(root.querySelector("#set-weekstart").value);
         saveSettings();
-        applyTheme(); applyCompactMode();
         render();
         closeModal(modal);
       } else if (action === "exportCSV") {
@@ -1533,9 +1499,12 @@ function confirmClearAllStage2(onDone) {
         state.idleAcknowledged = {};
         render();
         toast({title: "All data cleared", className: "success"});
+        closeModal(modal);
+        if (onDone) onDone();
+      } else {
+        closeModal(modal);
+        if (onDone) onDone();
       }
-      closeModal(modal);
-      if (onDone) onDone();
     },
   });
 }
@@ -1639,14 +1608,7 @@ function triggerImport() {
       try {
         const parsed = JSON.parse(text);
         if (parsed.encrypted) {
-          const pw = prompt("Enter password to decrypt this backup:");
-          if (!pw) return;
-          try {
-            const decrypted = await decrypt(parsed, pw);
-            importJSON(JSON.parse(decrypted));
-          } catch (e) {
-            alert("Decryption failed. Wrong password?");
-          }
+          openDecryptModal(parsed);
         } else {
           importJSON(parsed);
         }
@@ -1656,6 +1618,40 @@ function triggerImport() {
     }
   };
   input.click();
+}
+
+function openDecryptModal(payload) {
+  const modal = openModal({
+    title: "Decrypt backup",
+    body: `
+      <p style="margin-top:0; font-size: 13px;">This backup is encrypted. Enter the password you used when exporting it.</p>
+      <div class="form-row">
+        <label>Password</label>
+        <input type="password" id="decrypt-password" autocomplete="current-password" placeholder="Enter password">
+      </div>
+      <p id="decrypt-error" style="color: var(--danger); font-size: 12px; display: none; margin-top: 6px;">Wrong password or corrupted file. Try again.</p>
+    `,
+    footer: `
+      <button class="btn btn-secondary" data-action="cancel">Cancel</button>
+      <button class="btn btn-primary" data-action="decrypt">Decrypt &amp; Import</button>
+    `,
+    onAction: async (action, root) => {
+      if (action !== "decrypt") { closeModal(modal); return; }
+      const pw = root.querySelector("#decrypt-password").value;
+      if (!pw) { root.querySelector("#decrypt-error").style.display = "block"; return; }
+      try {
+        const decrypted = await decrypt(payload, pw);
+        importJSON(JSON.parse(decrypted));
+        closeModal(modal);
+      } catch (e) {
+        root.querySelector("#decrypt-error").style.display = "block";
+        root.querySelector("#decrypt-password").value = "";
+        root.querySelector("#decrypt-password").focus();
+      }
+    },
+  });
+  // Auto-focus password field
+  setTimeout(() => modal.querySelector("#decrypt-password")?.focus(), 50);
 }
 
 function importJSON(data) {
@@ -1942,8 +1938,8 @@ function openModal({title, body, footer, onAction}) {
     <div class="modal" role="dialog" aria-modal="true">
       <div class="modal-header">
         <h2 class="modal-title">${title}</h2>
-        <button class="icon-btn modal-close" data-action="cancel" aria-label="Close">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="12" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        <button class="icon-btn modal-close" aria-label="Close" data-close>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
       <div class="modal-body">${body}</div>
@@ -1951,16 +1947,27 @@ function openModal({title, body, footer, onAction}) {
     </div>
   `;
   document.getElementById("modal-root").appendChild(root);
-  root.addEventListener("click", (e) => {
-    if (e.target === root) onAction && onAction("cancel", root.querySelector(".modal"));
-  });
+
+  // X button and backdrop always close immediately — no routing through onAction
+  const dismiss = () => {
+    onAction && onAction("cancel", root.querySelector(".modal"));
+    closeModal(root);
+  };
+  root.querySelector("[data-close]").onclick = dismiss;
+  root.addEventListener("click", (e) => { if (e.target === root) dismiss(); });
+
+  // Named action buttons route through onAction (they are responsible for closing if needed)
   root.querySelectorAll("[data-action]").forEach(btn => {
     btn.onclick = (e) => {
       e.stopPropagation();
       onAction && onAction(btn.dataset.action, root.querySelector(".modal"));
     };
   });
-  const esc = (e) => { if (e.key === "Escape") { onAction && onAction("cancel", root.querySelector(".modal")); document.removeEventListener("keydown", esc); } };
+
+  // Escape key
+  const esc = (e) => {
+    if (e.key === "Escape") { dismiss(); document.removeEventListener("keydown", esc); }
+  };
   document.addEventListener("keydown", esc);
   return root;
 }
@@ -2001,50 +2008,25 @@ function toast({id, title, body, className, actions, persistent, timeout}) {
 // =====================================================================
 // Theme + compact mode
 // =====================================================================
-// "auto" removes the data-theme attribute entirely, letting the CSS media
-// query decide light vs dark. "light" and "dark" force the choice.
-// Mirrors the expense tracker's pattern exactly.
 function applyTheme() {
-  const t = state.settings.theme; // "system" (was legacy name for auto), "light", "dark"
+  const t = state.settings.theme;
   const choice = (t === "system" || t === "auto") ? "auto" : t;
   if (choice === "auto") {
     document.documentElement.removeAttribute("data-theme");
   } else {
     document.documentElement.setAttribute("data-theme", choice);
   }
-  // Reflect effective theme in the tab-color meta tag (nice on mobile)
   const effectiveDark = choice === "dark" || (choice === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
   document.querySelector('meta[name="theme-color"]').setAttribute("content", effectiveDark ? "#00274C" : "#FFFFFF");
-  // Sync segmented control active state
-  document.querySelectorAll("[data-theme-choice]").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.themeChoice === choice);
-  });
 }
 
 function applyCompactMode() {
   const m = state.settings.compactMode;
-  if (m === "auto") {
-    document.documentElement.dataset.compact = window.innerWidth < 640 ? "on" : "off";
-  } else {
-    document.documentElement.dataset.compact = m;
-  }
-  // Sync segmented control active state
-  document.querySelectorAll("[data-compact-choice]").forEach(btn => {
-    btn.classList.toggle("active", btn.dataset.compactChoice === m);
-  });
+  document.documentElement.dataset.compact = m === "auto" ? (window.innerWidth < 640 ? "on" : "off") : m;
 }
 
-function setTheme(choice) {
-  state.settings.theme = choice; // "auto" | "light" | "dark"
-  saveSettings();
-  applyTheme();
-}
-
-function setCompactMode(choice) {
-  state.settings.compactMode = choice; // "auto" | "on" | "off"
-  saveSettings();
-  applyCompactMode();
-}
+function setTheme(choice) { state.settings.theme = choice; saveSettings(); applyTheme(); }
+function setCompactMode(choice) { state.settings.compactMode = choice; saveSettings(); applyCompactMode(); }
 
 // =====================================================================
 // Service worker registration + update banner
@@ -2069,22 +2051,14 @@ function registerSW() {
 // =====================================================================
 function init() {
   loadState();
-  // Migrate legacy theme value from the icon-toggle era
   if (state.settings.theme === "system") { state.settings.theme = "auto"; saveSettings(); }
   applyTheme();
   applyCompactMode();
 
-  // Header controls: segmented toggles + settings icon
-  document.querySelectorAll("[data-theme-choice]").forEach(btn => {
-    btn.addEventListener("click", () => setTheme(btn.dataset.themeChoice));
-  });
-  document.querySelectorAll("[data-compact-choice]").forEach(btn => {
-    btn.addEventListener("click", () => setCompactMode(btn.dataset.compactChoice));
-  });
+  // Header controls
   document.getElementById("settings-btn").onclick = openSettings;
   document.getElementById("reload-btn").onclick = () => location.reload();
 
-  // System theme change listener — only matters when the user is in Auto
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
     if (state.settings.theme === "auto") applyTheme();
   });

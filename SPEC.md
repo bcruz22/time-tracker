@@ -359,12 +359,4 @@ Everything above in sections 1–20.
 - Release process matches expense tracker: bump `CACHE_NAME` in `sw.js`, commit, push to `main`, GitHub Pages rebuilds
 - README follows expense tracker's structure
 
----
 
-## Open Items to Confirm Before Build
-
-None. This spec reflects all decisions made through the discovery conversation. Any changes get flagged as a spec revision before code changes.
-
-## Post-Build Cadence
-
-Per established workflow: after each round of changes, proactively surface commit message, GitHub release notes grouped by New features / Fixes / Service worker / Data model, and version bump recommendation (patch vs minor) with reasoning.
