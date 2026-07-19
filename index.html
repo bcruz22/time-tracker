@@ -1373,6 +1373,23 @@ function openSettings() {
     title: "Settings",
     body: `
       <div class="modal-section">
+        <h3>Appearance</h3>
+        <div class="settings-row"><label>Theme</label>
+          <select class="settings-control" id="set-theme">
+            <option value="auto" ${(s.theme==="auto"||s.theme==="system")?"selected":""}>Auto</option>
+            <option value="light" ${s.theme==="light"?"selected":""}>Light</option>
+            <option value="dark" ${s.theme==="dark"?"selected":""}>Dark</option>
+          </select>
+        </div>
+        <div class="settings-row"><label>Compact mode</label>
+          <select class="settings-control" id="set-compact">
+            <option value="auto" ${s.compactMode==="auto"?"selected":""}>Auto</option>
+            <option value="on" ${s.compactMode==="on"?"selected":""}>On</option>
+            <option value="off" ${s.compactMode==="off"?"selected":""}>Off</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-section">
         <h3>Timing</h3>
         <div class="settings-row"><label>Idle warning (minutes)</label>
           <input class="settings-control" type="number" min="1" max="480" id="set-idle" value="${s.idleThresholdMinutes}" style="width: 80px;">
@@ -1408,6 +1425,8 @@ function openSettings() {
     footer: `<button class="btn btn-primary" data-action="save">Done</button>`,
     onAction: (action, root) => {
       if (action === "save") {
+        setTheme(root.querySelector("#set-theme").value);
+        setCompactMode(root.querySelector("#set-compact").value);
         state.settings.idleThresholdMinutes = Math.max(1, parseInt(root.querySelector("#set-idle").value) || 60);
         state.settings.weekStartDay = parseInt(root.querySelector("#set-weekstart").value);
         saveSettings();
