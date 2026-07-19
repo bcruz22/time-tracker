@@ -1,7 +1,7 @@
 // Service worker for Time /T
 // Bump CACHE_NAME on every release to trigger the "New version available" banner.
 
-const CACHE_NAME = "time-tracker-v3";
+const CACHE_NAME = "time-tracker-v4";
 const CORE = [
   "./",
   "./index.html",
